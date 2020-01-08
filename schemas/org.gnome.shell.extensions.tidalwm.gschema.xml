@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+    <schema path="/org/gnome/shell/extensions/tidalwm/" id="org.gnome.shell.extensions.tidalwm">
+        <key name="window-gaps" type="i">
+            <default>20</default>
+            <description>The space between windows once they are tiled</description>
+        </key>
+        <key name="tile-mode" type="i">
+            <default>0</default>
+            <description>How to arrange new windows, (0 = spiral, 1 = i3 style, 2 = binary)</description>
+        </key>
+        <key name="rotate-windows" type="as">
+            <default><![CDATA[['<Control><Alt>o']]]></default>
+            <description>Rotate window tiling order</description>
+        </key>
+        <key name="float-window" type="as">
+            <default><![CDATA[['<Control><Alt>f']]]></default>
+            <description>Toggle floating current window</description>
+        </key>
+        <key name="inactive-opacity" type="i">
+            <default>90</default>
+            <description>Opacity of unfocused windows</description>
+        </key>
+    </schema>
+</schemalist>

@@ -1,0 +1,13 @@
+{
+    "extension-id": "tidalwm",
+    "name": "TidalWM",
+    "description": "Sane Gnome tiling window manager",
+    "uuid": "tidalwm@rustysec.github.io",
+    "shell-version": [
+        "3.34"
+    ],
+    "version": 1,
+    "url": "https://github.com/rustysec/tidalwm",
+    "settings-schema": "org.gnome.shell.extensions.tidalwm",
+    "gettext-domain": "tidalwm@rustysec.github.io"
+}
