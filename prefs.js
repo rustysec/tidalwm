@@ -134,6 +134,35 @@ function buildPrefsWidget() {
     prefsWidget.attach(opacity, 1, 4, 1, 1);
     opacity.connect('value-changed', () => this.settings.set_int("inactive-opacity", opacity.get_value()));
 
+    /*** Hotkeys ***/
+    let label = new Gtk.Label({
+        label: 'Float Window:',
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    prefsWidget.attach(label, 0, 5, 1, 1);
+
+    let floatEntry = new Gtk.Entry({
+        visible: true
+    });
+    floatEntry.set_text(this.settings.get_strv("float-window")[0]);
+    prefsWidget.attach(floatEntry, 1, 5, 1, 1);
+    floatEntry.connect('changed', () => this.settings.set_strv("float-window", [floatEntry.get_text()]));
+
+    label = new Gtk.Label({
+        label: 'Rotate Windows:',
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    prefsWidget.attach(label, 0, 6, 1, 1);
+
+    let rotateEntry = new Gtk.Entry({
+        visible: true
+    });
+    rotateEntry.set_text(this.settings.get_strv("rotate-windows")[0]);
+    prefsWidget.attach(rotateEntry, 1, 6, 1, 1);
+    rotateEntry.connect('changed', () => this.settings.set_strv("rotate-window", [rotateEntry.get_text()]));
+
     // Return our widget which will be added to the window
     return prefsWidget;
 }
