@@ -28,6 +28,18 @@ Some notes about compatibility:
 - Use static workspaces
 - Please don't try to use dynamic workspaces yet
 
+## Shortcuts
+#### Float Window
+Takes the focused window, removes it from tiling and forces it to be always on top
+
+Ex: `[Ctrl-Alt-f]`
+
+#### Rotate Windows
+Reorders the windows within the `spiral` tiling configuration.
+
+Ex: `[Ctrl-Alt-o]`
+
+## FAQ
 ### Why is this a thing?
 This question can probably be broken down into two subquestions:
 
