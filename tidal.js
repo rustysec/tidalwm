@@ -55,8 +55,9 @@ var Tidal = class TidalClass {
                 floating
             };
 
-            if (rendered && !floating)
+            if (rendered && !floating) {
                 this.pools[`${workspace.index()}-${monitor}`].addWindow(window);
+            }
 
             this.setWindowOpacities();
         }
@@ -96,6 +97,13 @@ var Tidal = class TidalClass {
 
             this.windows[window.get_id()].rendered = true;
             this.pools[`${workspace.index()}-${monitor}`].addWindow(window);
+
+            let alwaysFloat = this.settings.get_strv("always-float")[0].split(",");
+            let wmClass = window.get_wm_class();
+
+            if (alwaysFloat.includes(wmClass)) {
+                this.floatWindow(this, window.get_display());
+            }
         }
     }
 
