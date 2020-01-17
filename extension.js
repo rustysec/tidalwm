@@ -76,7 +76,7 @@ class Extension {
                 "window-created",
                 (display, window) => {
                     let number = window.get_monitor();
-                    log(`window ${window.get_id()} ${window.get_window_type()} created monitor ${number} on workspace ${window.get_workspace().index()}`);
+                    log(`window ${window.get_id()} created monitor ${number} on workspace ${window.get_workspace().index()}`);
                     this.windowCreated(window);
                 }
             )
@@ -86,7 +86,7 @@ class Extension {
             global.display.connect(
                 "window-left-monitor", (display, number, window) => {
                     if (window.get_workspace()) {
-                        log(`window ${window.get_id()} ${window.get_wm_class()} left monitor ${number} on workspace ${window.get_workspace().index()}`);
+                        log(`window ${window.get_id()} left monitor ${number} on workspace ${window.get_workspace().index()}`);
                         if (window.get_window_type() == 0) {
                             this._tidal.removeWindow(window);
                         }
@@ -104,10 +104,6 @@ class Extension {
             global.display.connect(
                 "window-entered-monitor", (display, number, window) => {
                     log(`window ${window.get_id()} ${window.get_wm_class()} entered monitor ${number} on workspace ${window.get_workspace().index()}`);
-                    log(`-> role: ${window.get_role()}`);
-                    log(`-> wm_class: ${window.get_wm_class()}`);
-                    log(`-> title: ${window.get_title()}`);
-                    log(`-> description: ${window.get_description()}`);
                     if (window.get_window_type() == 0) {
                         this._tidal.addWindow(window);
                     }
@@ -161,10 +157,6 @@ class Extension {
             }
             actor.disconnect(id);
         });
-    }
-
-    handleBinding(one, two) {
-        log(`handled binding ${one} ${two}`);
     }
 
     addKeyBinding(key, cb) {

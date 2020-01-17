@@ -163,6 +163,21 @@ function buildPrefsWidget() {
     prefsWidget.attach(rotateEntry, 1, 6, 1, 1);
     rotateEntry.connect('changed', () => this.settings.set_strv("rotate-window", [rotateEntry.get_text()]));
 
+    /*** Always Float ***/
+    label = new Gtk.Label({
+        label: 'Always Float:',
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    prefsWidget.attach(label, 0, 7, 1, 1);
+
+    let alwaysFloatEntry = new Gtk.Entry({
+        visible: true
+    });
+    alwaysFloatEntry.set_text(this.settings.get_strv("always-float")[0]);
+    prefsWidget.attach(alwaysFloatEntry, 1, 7, 1, 1);
+    alwaysFloatEntry.connect('changed', () => this.settings.set_strv("always-float", [alwaysFloatEntry.get_text()]));
+
     // Return our widget which will be added to the window
     return prefsWidget;
 }

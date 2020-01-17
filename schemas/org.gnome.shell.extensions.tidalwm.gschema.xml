@@ -21,5 +21,9 @@
             <default>90</default>
             <description>Opacity of unfocused windows</description>
         </key>
+        <key name="always-float" type="as">
+            <default><![CDATA[['']]]></default>
+            <description>Comma separated list of window classes to always float</description>
+        </key>
     </schema>
 </schemalist>
