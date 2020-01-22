@@ -59,7 +59,7 @@ var Spiral = class SpiralClass {
     }
 
     // take the windows being managed together and places them via the spiral
-    // algo
+    // algorithm
     spiralWindows() {
         if (!this.windows || !this.windows.length) {
             return;
@@ -67,17 +67,13 @@ var Spiral = class SpiralClass {
 
         let gaps =
             this.settings.get_int("window-gaps") *
-            this.windows[0]
-                .window
-                .get_workspace()
+            global.workspace_manager.get_workspace_by_index(this.workspace)
                 .get_display()
-                .get_monitor_scale(this.windows[0].window.get_monitor());
+                .get_monitor_scale(this.monitor);
 
         let workspace = global.workspace_manager.get_workspace_by_index(this.workspace);
         let work_area = workspace
-            .get_work_area_for_monitor(
-                this.windows[0].window.get_monitor()
-            );
+            .get_work_area_for_monitor(this.monitor);
 
         work_area.x = work_area.x + gaps;
         work_area.y = work_area.y + gaps;
