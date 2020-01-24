@@ -71,6 +71,13 @@ class Extension {
             )
         );
 
+        settingsSignals.push(
+            this._settings.connect(
+                "changed::highlight-active",
+                (settings) => this.highlightActiveChanged(settings)
+            )
+        );
+
         displaySignals.push(
             global.display.connect(
                 "window-created",
@@ -145,6 +152,11 @@ class Extension {
 
     gapsChanged(data) {
         log(`gaps value has changed: ${data.get_value("window-gaps").deep_unpack()}`);
+    }
+
+    highlightActiveChanged(settings) {
+        log(`highlight active settings have changed: ${settings.get_boolean("highlight-active")}`);
+        this._tidal.toggleHighlightActive(settings.get_boolean("highlight-active"));
     }
 
     windowCreated(window) {

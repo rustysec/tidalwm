@@ -25,5 +25,9 @@
             <default><![CDATA[['']]]></default>
             <description>Comma separated list of window classes to always float</description>
         </key>
+        <key name="highlight-active" type="b">
+            <default>true</default>
+            <description>Draw a border around the active window</description>
+        </key>
     </schema>
 </schemalist>

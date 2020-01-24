@@ -1,6 +1,7 @@
 const Clutter = imports.gi.Clutter;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
+const ActiveHighlight = Me.imports.highlight.ActiveHighlight;
 
 var Tidal = class TidalClass {
 
@@ -9,6 +10,8 @@ var Tidal = class TidalClass {
         this.settings = settings;
         this.windows = {};
         this.pools = {};
+
+        this.toggleHighlightActive(this.settings.get_boolean("highlight-active"));
 
         for (var i = 0; i < global.workspace_manager.get_n_workspaces(); i++) {
             let workspace = global.workspace_manager.get_workspace_by_index(i);
@@ -26,6 +29,19 @@ var Tidal = class TidalClass {
             this.cacheWindows(workspace);
             for (var j = 0; j < workspace.get_display().get_n_monitors(); j++) {
                 this.pools[`${i}-${j}`] = new Me.imports.pool.Pool(this.settings, i, j);
+            }
+        }
+    }
+
+    toggleHighlightActive(enable) {
+        if (enable) {
+            this.active_highlight = new ActiveHighlight();
+            global.window_group.add_child(this.active_highlight);
+            this.setWindowOpacitiesAndHighlight();
+        } else {
+            if (this.active_highlight) {
+                this.active_highlight.hide();
+                global.window_group.remove_child(this.active_highlight);
             }
         }
     }
@@ -59,7 +75,7 @@ var Tidal = class TidalClass {
                 this.pools[`${workspace.index()}-${monitor}`].addWindow(window);
             }
 
-            this.setWindowOpacities();
+            this.setWindowOpacitiesAndHighlight();
         }
     }
 
@@ -68,25 +84,41 @@ var Tidal = class TidalClass {
         if (window.get_window_type() == 0) {
             let id = window.get_id();
             log(`window focus changed to ${id}`);
-            tidal.setWindowOpacities();
+            tidal.setWindowOpacitiesAndHighlight();
 
         }
     }
 
-    // walk the window list and adjust opacities accordingly
-    setWindowOpacities() {
+    // walk the window list and adjust opacities accordingly, highlight active window
+    // if enabled
+    setWindowOpacitiesAndHighlight() {
         let opacity = (this.settings.get_int("inactive-opacity") / 100) * 255;
+        let highlight = this.settings.get_boolean("highlight-active");
+        let highlighted = false;
+
+        if (highlight) {
+            this.active_highlight.hide();
+        }
 
         global.get_window_actors().forEach(actor => {
             let meta = actor.get_meta_window();
             if (meta && meta.get_window_type() == 0) {
                 if (meta.appears_focused) {
                     actor.opacity = 255;
+                    if (highlight) {
+                        this.active_highlight.window = meta;
+                        this.active_highlight.show();
+                        highlighted = true;
+                    }
                 } else {
                     actor.opacity = opacity;
                 }
             }
         });
+
+        if (this.active_hightlight && (!highlight || !highlighted)) {
+            this.active_highlight.hide();
+        }
     }
 
     // signal that a window is ready to be operated on
@@ -116,7 +148,7 @@ var Tidal = class TidalClass {
 
             this.pools[`${workspace.index()}-${monitor}`].removeWindow(window);
 
-            this.setWindowOpacities();
+            this.setWindowOpacitiesAndHighlight();
         }
     }
 

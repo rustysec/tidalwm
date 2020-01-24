@@ -85,7 +85,10 @@ function buildPrefsWidget() {
         adjustment: gaps_adjustment,
     });
     prefsWidget.attach(gaps, 1, 2, 1, 1);
-    gaps.connect('value-changed', () => this.settings.set_int("window-gaps", gaps.get_value()));
+    gaps.connect('value-changed', () => {
+        this.settings.set_int("window-gaps", gaps.get_value());
+        this.settings.apply();
+    });
 
     /*** Tiling Mode ***/
     let tileModeLabel = new Gtk.Label({
@@ -132,7 +135,10 @@ function buildPrefsWidget() {
         adjustment: inactive_opacity_adjustment,
     });
     prefsWidget.attach(opacity, 1, 4, 1, 1);
-    opacity.connect('value-changed', () => this.settings.set_int("inactive-opacity", opacity.get_value()));
+    opacity.connect('value-changed', () => {
+        this.settings.set_int("inactive-opacity", opacity.get_value());
+        this.settings.apply();
+    });
 
     /*** Hotkeys ***/
     let label = new Gtk.Label({
@@ -147,7 +153,10 @@ function buildPrefsWidget() {
     });
     floatEntry.set_text(this.settings.get_strv("float-window")[0]);
     prefsWidget.attach(floatEntry, 1, 5, 1, 1);
-    floatEntry.connect('changed', () => this.settings.set_strv("float-window", [floatEntry.get_text()]));
+    floatEntry.connect('changed', () => {
+        this.settings.set_strv("float-window", [floatEntry.get_text()]);
+        this.settings.apply();
+    });
 
     label = new Gtk.Label({
         label: 'Rotate Windows:',
@@ -161,7 +170,10 @@ function buildPrefsWidget() {
     });
     rotateEntry.set_text(this.settings.get_strv("rotate-windows")[0]);
     prefsWidget.attach(rotateEntry, 1, 6, 1, 1);
-    rotateEntry.connect('changed', () => this.settings.set_strv("rotate-window", [rotateEntry.get_text()]));
+    rotateEntry.connect('changed', () => {
+        this.settings.set_strv("rotate-window", [rotateEntry.get_text()]);
+        this.settings.apply();
+    });
 
     /*** Always Float ***/
     label = new Gtk.Label({
@@ -176,7 +188,28 @@ function buildPrefsWidget() {
     });
     alwaysFloatEntry.set_text(this.settings.get_strv("always-float")[0]);
     prefsWidget.attach(alwaysFloatEntry, 1, 7, 1, 1);
-    alwaysFloatEntry.connect('changed', () => this.settings.set_strv("always-float", [alwaysFloatEntry.get_text()]));
+    alwaysFloatEntry.connect('changed', () => {
+        this.settings.set_strv("always-float", [alwaysFloatEntry.get_text()]);
+        this.settings.apply();
+    });
+
+    /** Active Window Border **/
+    label = new Gtk.Label({
+        label: 'Active Window Border:',
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    prefsWidget.attach(label, 0, 8, 1, 1);
+    let activeSwitch = new Gtk.Switch({
+        active: this.settings.get_boolean('highlight-active'),
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    prefsWidget.attach(activeSwitch, 1, 8, 1, 1);
+    activeSwitch.connect('state-set', (t) => {
+        this.settings.set_boolean("highlight-active", activeSwitch.get_active());
+        this.settings.apply();
+    });
 
     // Return our widget which will be added to the window
     return prefsWidget;
