@@ -23,10 +23,14 @@ Activate with:
 ```sh
 gnome-shell-extension-prefs
 ```
+
+**Log out and back in**
+
 Some notes about compatibility:
 - Tidal does not handle dynamic workspace addition/removal at this time
 - Use static workspaces
 - Please don't try to use dynamic workspaces yet
+- `gnome-terminal` doesn't play nicely, [issue here](https://github.com/rustysec/tidalwm/issues/8) for more details
 
 ## Shortcuts
 #### Float Window
@@ -38,6 +42,14 @@ Ex: `[Ctrl-Alt-f]`
 Reorders the windows within the `spiral` tiling configuration.
 
 Ex: `[Ctrl-Alt-o]`
+
+## Current Features
+* Automatic spiral tiling
+* Adjustable gaps
+* Inactive window opacity settings
+* Active window border option
+* Customizable tiling exemption lists
+* Customizable hotkeys for floating and rotating order
 
 ## FAQ
 ### Why is this a thing?
@@ -57,6 +69,11 @@ features (like gaps or auto tiling) that I want, or they add too much to the gno
 that I don't need or care for.
 
 ### What Tidal is _not_
+Tidal is _not_ a brand new skin on gnome. It doesn't aim to re-write gnome paradigms and make 
+it something that it's not. This extension simply assists the user in organizing windows  to
+increase productivity, essentially bringing the basic benefits of a tiling manager to gnome's
+fully featured desktop environment.
+
 This began strictly as a productivity hack for me. I don't play games, and primarily
 live in the terminal and a browser. It is possible that Tidal is currently not very
 compatible with other work flows, so be cautioned! Open an issue and I'll try to 

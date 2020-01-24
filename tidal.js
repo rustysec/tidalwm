@@ -33,6 +33,8 @@ var Tidal = class TidalClass {
         }
     }
 
+    // if `enable` is true, setup the active highlighter, otherwise tear down
+    // the instance if it already exists
     toggleHighlightActive(enable) {
         if (enable) {
             this.active_highlight = new ActiveHighlight();
@@ -83,9 +85,7 @@ var Tidal = class TidalClass {
     windowFocusChanged(tidal, window) {
         if (window.get_window_type() == 0) {
             let id = window.get_id();
-            log(`window focus changed to ${id}`);
             tidal.setWindowOpacitiesAndHighlight();
-
         }
     }
 
