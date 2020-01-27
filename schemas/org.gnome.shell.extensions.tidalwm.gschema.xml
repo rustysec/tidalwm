@@ -25,5 +25,9 @@
             <default><![CDATA[['']]]></default>
             <description>Comma separated list of window classes to always float</description>
         </key>
+        <key name="smart-gaps" type="b">
+            <default>false</default>
+            <description>Gaps only enabled when more than one window is present</description>
+        </key>
     </schema>
 </schemalist>
