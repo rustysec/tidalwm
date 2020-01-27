@@ -42,6 +42,15 @@ Reorders the windows within the `spiral` tiling configuration.
 
 Ex: `[Ctrl-Alt-o]`
 
+## Current Features
+* Automatic spiral tiling
+* Adjustable gaps
+* Smart gaps
+* Inactive window opacity settings
+* Active window border option
+* Customizable tiling exemption lists
+* Customizable hotkeys for floating and rotating order
+
 ## FAQ
 ### Why is this a thing?
 This question can probably be broken down into two subquestions:
