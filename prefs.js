@@ -87,13 +87,31 @@ function buildPrefsWidget() {
     prefsWidget.attach(gaps, 1, 2, 1, 1);
     gaps.connect('value-changed', () => this.settings.set_int("window-gaps", gaps.get_value()));
 
+    /** Smart Gaps **/
+    let label = new Gtk.Label({
+        label: 'Smart Gaps:',
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    prefsWidget.attach(label, 0, 3, 1, 1);
+    let smartGapsSwitch = new Gtk.Switch({
+        active: this.settings.get_boolean('smart-gaps'),
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    prefsWidget.attach(smartGapsSwitch, 1, 3, 1, 1);
+    smartGapsSwitch.connect('state-set', (t) => {
+        this.settings.set_boolean("smart-gaps", smartGapsSwitch.get_active());
+        this.settings.apply();
+    });
+
     /*** Tiling Mode ***/
     let tileModeLabel = new Gtk.Label({
         label: 'Tiling Mode:',
         halign: Gtk.Align.START,
         visible: true
     });
-    prefsWidget.attach(tileModeLabel, 0, 3, 1, 1); 
+    prefsWidget.attach(tileModeLabel, 0, 4, 1, 1); 
 
     let radio_spiral = new Gtk.RadioButton({label: 'Spiral', visible: true});
     let radio_binary = new Gtk.RadioButton({label: 'Binary', visible: true, group: radio_spiral});
@@ -103,9 +121,9 @@ function buildPrefsWidget() {
     radio_binary.set_sensitive(false);
     radio_i3.set_sensitive(false);
 
-    prefsWidget.attach(radio_spiral, 1, 3, 1, 1);
-    prefsWidget.attach(radio_binary, 2, 3, 1, 1);
-    prefsWidget.attach(radio_i3, 3, 3, 1, 1);
+    prefsWidget.attach(radio_spiral, 1, 4, 1, 1);
+    prefsWidget.attach(radio_binary, 2, 4, 1, 1);
+    prefsWidget.attach(radio_i3, 3, 4, 1, 1);
 
     /*** Inactive Opacity ***/
     let inactiveOpacity = new Gtk.Label({
@@ -113,7 +131,7 @@ function buildPrefsWidget() {
         halign: Gtk.Align.START,
         visible: true
     });
-    prefsWidget.attach(inactiveOpacity, 0, 4, 1, 1);
+    prefsWidget.attach(inactiveOpacity, 0, 5, 1, 1);
 
     let inactive_opacity_adjustment = new Gtk.Adjustment({
         lower: 5,
@@ -131,22 +149,22 @@ function buildPrefsWidget() {
         input_purpose: "number",
         adjustment: inactive_opacity_adjustment,
     });
-    prefsWidget.attach(opacity, 1, 4, 1, 1);
+    prefsWidget.attach(opacity, 1, 5, 1, 1);
     opacity.connect('value-changed', () => this.settings.set_int("inactive-opacity", opacity.get_value()));
 
     /*** Hotkeys ***/
-    let label = new Gtk.Label({
+    label = new Gtk.Label({
         label: 'Float Window:',
         halign: Gtk.Align.START,
         visible: true
     });
-    prefsWidget.attach(label, 0, 5, 1, 1);
+    prefsWidget.attach(label, 0, 6, 1, 1);
 
     let floatEntry = new Gtk.Entry({
         visible: true
     });
     floatEntry.set_text(this.settings.get_strv("float-window")[0]);
-    prefsWidget.attach(floatEntry, 1, 5, 1, 1);
+    prefsWidget.attach(floatEntry, 1, 6, 1, 1);
     floatEntry.connect('changed', () => this.settings.set_strv("float-window", [floatEntry.get_text()]));
 
     label = new Gtk.Label({
@@ -154,13 +172,13 @@ function buildPrefsWidget() {
         halign: Gtk.Align.START,
         visible: true
     });
-    prefsWidget.attach(label, 0, 6, 1, 1);
+    prefsWidget.attach(label, 0, 7, 1, 1);
 
     let rotateEntry = new Gtk.Entry({
         visible: true
     });
     rotateEntry.set_text(this.settings.get_strv("rotate-windows")[0]);
-    prefsWidget.attach(rotateEntry, 1, 6, 1, 1);
+    prefsWidget.attach(rotateEntry, 1, 7, 1, 1);
     rotateEntry.connect('changed', () => this.settings.set_strv("rotate-window", [rotateEntry.get_text()]));
 
     /*** Always Float ***/
@@ -169,13 +187,13 @@ function buildPrefsWidget() {
         halign: Gtk.Align.START,
         visible: true
     });
-    prefsWidget.attach(label, 0, 7, 1, 1);
+    prefsWidget.attach(label, 0, 8, 1, 1);
 
     let alwaysFloatEntry = new Gtk.Entry({
         visible: true
     });
     alwaysFloatEntry.set_text(this.settings.get_strv("always-float")[0]);
-    prefsWidget.attach(alwaysFloatEntry, 1, 7, 1, 1);
+    prefsWidget.attach(alwaysFloatEntry, 1, 8, 1, 1);
     alwaysFloatEntry.connect('changed', () => this.settings.set_strv("always-float", [alwaysFloatEntry.get_text()]));
 
     // Return our widget which will be added to the window

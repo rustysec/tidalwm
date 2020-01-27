@@ -71,6 +71,13 @@ class Extension {
             )
         );
 
+        settingsSignals.push(
+            this._settings.connect(
+                "changed::smart-gaps",
+                this.gapsChanged
+            )
+        );
+
         displaySignals.push(
             global.display.connect(
                 "window-created",

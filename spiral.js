@@ -65,7 +65,9 @@ var Spiral = class SpiralClass {
             return;
         }
 
-        let gaps =
+        let smartGaps = this.settings.get_boolean("smart-gaps");
+
+        let gaps = (smartGaps && this.windows.length == 1) ? 0 :
             this.settings.get_int("window-gaps") *
             global.workspace_manager.get_workspace_by_index(this.workspace)
                 .get_display()
