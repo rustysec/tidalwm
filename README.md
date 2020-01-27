@@ -17,16 +17,19 @@ Clone this repo:
 ```sh
 git clone https://github.com/rustysec/tidalwm \
     ~/.local/share/gnome-shell/extensions/tidalwm@rustysec.github.io
-
 ```
+
+Logout from current session and login again to start a new session.
+
 Activate with:
 ```sh
 gnome-shell-extension-prefs
 ```
 Some notes about compatibility:
 - Tidal does not handle dynamic workspace addition/removal at this time
-- Use static workspaces
+- **Use static workspaces**
 - Please don't try to use dynamic workspaces yet
+- Gtk terminals like gnome-terminal and tilix doesn't behave well, try using alternatives like kitty or alacritty
 
 ## Shortcuts
 #### Float Window
