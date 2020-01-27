@@ -24,10 +24,9 @@ var Tidal = class TidalClass {
             });
 
             this.cacheWindows(workspace);
-            for (var j = 0; j < workspace.get_display().get_n_monitors(); j++) {
-                this.pools[`${i}-${j}`] = new Me.imports.pool.Pool(this.settings, i, j);
-            }
         }
+
+        this.setupPools();
     }
 
     // adds a window to Tidal's management system
@@ -190,6 +189,19 @@ var Tidal = class TidalClass {
                         };
                     }
                 });
+        }
+    }
+
+    // ensure there is a window pool for each monitor on every workspace
+    setupPools() {
+        for (var i = 0; i < global.workspace_manager.get_n_workspaces(); i++) {
+            let workspace = global.workspace_manager.get_workspace_by_index(i);
+
+            for (var j = 0; j < workspace.get_display().get_n_monitors(); j++) {
+                if (!pools[`${i}-${j}`]) {
+                    this.pools[`${i}-${j}`] = new Me.imports.pool.Pool(this.settings, i, j);
+                }
+            }
         }
     }
 
