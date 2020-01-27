@@ -78,6 +78,13 @@ class Extension {
             )
         );
 
+        settingsSignals.push(
+            this._settings.connect(
+                "changed::initial-direction",
+                this.directionChanged
+            )
+        );
+
         displaySignals.push(
             global.display.connect(
                 "window-created",
@@ -152,6 +159,10 @@ class Extension {
 
     gapsChanged(data) {
         log(`gaps value has changed: ${data.get_value("window-gaps").deep_unpack()}`);
+    }
+
+    directionChanged(data) {
+        log(`initial direction changed ${data.get_int("initial-direction")}`);
     }
 
     windowCreated(window) {

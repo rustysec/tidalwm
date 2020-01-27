@@ -196,6 +196,23 @@ function buildPrefsWidget() {
     prefsWidget.attach(alwaysFloatEntry, 1, 8, 1, 1);
     alwaysFloatEntry.connect('changed', () => this.settings.set_strv("always-float", [alwaysFloatEntry.get_text()]));
 
+    /*** Initial Split Direction ***/
+    label = new Gtk.Label({
+        label: 'Initial Split Direction:',
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    prefsWidget.attach(label, 0, 9, 1, 1); 
+
+    let radio_horizontal = new Gtk.RadioButton({label: 'Horizontal', visible: true});
+    let radio_vertical = new Gtk.RadioButton({label: 'Vertical', visible: true, group: radio_horizontal});
+
+    radio_horizontal.connect('toggled', () => this.settings.set_int("initial-direction", 0));
+    radio_vertical.connect('toggled', () => this.settings.set_int("initial-direction", 1));
+
+    prefsWidget.attach(radio_horizontal, 1, 9, 1, 1);
+    prefsWidget.attach(radio_vertical, 2, 9, 1, 1);
+
     // Return our widget which will be added to the window
     return prefsWidget;
 }
