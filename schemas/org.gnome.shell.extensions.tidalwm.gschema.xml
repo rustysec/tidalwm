@@ -29,5 +29,9 @@
             <default>false</default>
             <description>Gaps only enabled when more than one window is present</description>
         </key>
+        <key name="initial-direction" type="i">
+            <default>0</default>
+            <description>Initial direction to split (0 = horizontal, 1 = vertical)</description>
+        </key>
     </schema>
 </schemalist>

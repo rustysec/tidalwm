@@ -82,7 +82,7 @@ var Spiral = class SpiralClass {
         work_area.width = work_area.width - (gaps * 2);
         work_area.height = work_area.height - (gaps * 2);
 
-        let direction = HORIZONTAL;
+        let direction = this.settings.get_int("initial-direction");
 
         for (var i = 0; i < this.windows.length; i++) {
             log(`placing window ${this.windows[i].window.get_id()} with ${direction}`);

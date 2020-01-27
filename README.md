@@ -50,6 +50,7 @@ Ex: `[Ctrl-Alt-o]`
 * Active window border option
 * Customizable tiling exemption lists
 * Customizable hotkeys for floating and rotating order
+* Customizable initial split direction (horizontal vs vertical)
 
 ## FAQ
 ### Why is this a thing?
