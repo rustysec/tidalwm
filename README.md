@@ -17,10 +17,10 @@ Clone this repo:
 ```sh
 git clone https://github.com/rustysec/tidalwm \
     ~/.local/share/gnome-shell/extensions/tidalwm@rustysec.github.io
+```
 
 Logout from current session and login again to start a new session.
 
-```
 Activate with:
 ```sh
 gnome-shell-extension-prefs
