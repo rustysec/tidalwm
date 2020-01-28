@@ -26,7 +26,9 @@ Activate with:
 gnome-shell-extension-prefs
 ```
 Some notes about compatibility:
-- `gnome-terminal` doesn't behave well, try using alternatives like kitty or alacritty
+- `gnome-terminal` doesn't behave well, try using alternatives like
+[kitty](https://sw.kovidgoyal.net/kitty/) or
+[alacritty](https://github.com/alacritty/alacritty)
 
 ## Shortcuts
 #### Float Window
@@ -48,7 +50,7 @@ Ex: `[Ctrl-Alt-o]`
 * Customizable tiling exemption lists
 * Customizable hotkeys for floating and rotating order
 * Customizable initial split direction (horizontal vs vertical)
-* Dynamic workspaces are now supported!
+* **Dynamic workspaces** are now supported!
 
 ## FAQ
 ### Why is this a thing?
