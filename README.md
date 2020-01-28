@@ -3,7 +3,7 @@ Simple and sane window tiling window manager plugin for gnome shell, with gaps!
 
 ## Features
 Tidal is intended to be somewhat light on features and only handle the automatic
-placing of windows within the desktop. You may move windows to other desktops or
+placement of windows within the desktop. You may move windows to other desktops or
 monitors using the mouse (drag and drop) or gnome's built in hotkeys.
 
 Currently only "spiral" tiling is supported, but i3/sway and binary splitting are
@@ -26,10 +26,7 @@ Activate with:
 gnome-shell-extension-prefs
 ```
 Some notes about compatibility:
-- Tidal does not handle dynamic workspace addition/removal at this time
-- **Use static workspaces**
-- Please don't try to use dynamic workspaces yet
-- Gtk terminals like gnome-terminal and tilix doesn't behave well, try using alternatives like kitty or alacritty
+- Gtk terminals like gnome-terminal and tilix don't behave well, try using alternatives like kitty or alacritty
 
 ## Shortcuts
 #### Float Window
@@ -51,6 +48,7 @@ Ex: `[Ctrl-Alt-o]`
 * Customizable tiling exemption lists
 * Customizable hotkeys for floating and rotating order
 * Customizable initial split direction (horizontal vs vertical)
+* Dynamic workspaces are now supported!
 
 ## FAQ
 ### Why is this a thing?
@@ -70,7 +68,10 @@ features (like gaps or auto tiling) that I want, or they add too much to the gno
 that I don't need or care for.
 
 ### What Tidal is _not_
-This began strictly as a productivity hack for me. I don't play games, and primarily
+Tidal is not a wholesale abandonment of the gnome ethos. The only behavior this extension
+overrides is the window placement. All workspace functionality is still the same.
+
+This began strictly as a productivity hack for myself. I don't play games, and primarily
 live in the terminal and a browser. It is possible that Tidal is currently not very
 compatible with other work flows, so be cautioned! Open an issue and I'll try to 
 resolve it if you find some rough edges.
