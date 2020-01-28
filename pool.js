@@ -56,4 +56,12 @@ var Pool = class PoolClass {
             this.container.rotateWindows();
         }
     }
+
+    getEffectiveMonitor() {
+        return this.container.getEffectiveMonitor();
+    }
+
+    getEffectiveWorkspace() {
+        return this.container.getEffectiveWorkspace();
+    }
 }
