@@ -66,9 +66,7 @@ var Tidal = class TidalClass {
     windowFocusChanged(tidal, window) {
         if (window.get_window_type() == 0) {
             let id = window.get_id();
-            log(`window focus changed to ${id}`);
             tidal.setWindowOpacities();
-
         }
     }
 
@@ -194,15 +192,29 @@ var Tidal = class TidalClass {
 
     // ensure there is a window pool for each monitor on every workspace
     setupPools() {
+        let pools = {};
+
+        for (var pool in this.pools) {
+            let current = this.pools[pool];
+            let monitor = current.getEffectiveMonitor();
+            let workspace = current.getEffectiveWorkspace();
+            if (monitor !== null && workspace !== null) {
+                pools[`${workspace}-${monitor}`] = current;
+            }
+        }
+
+
         for (var i = 0; i < global.workspace_manager.get_n_workspaces(); i++) {
             let workspace = global.workspace_manager.get_workspace_by_index(i);
 
             for (var j = 0; j < workspace.get_display().get_n_monitors(); j++) {
-                if (!this.pools[`${i}-${j}`]) {
-                    this.pools[`${i}-${j}`] = new Me.imports.pool.Pool(this.settings, i, j);
+                if (!pools[`${i}-${j}`]) {
+                    pools[`${i}-${j}`] = new Me.imports.pool.Pool(this.settings, i, j);
                 }
             }
         }
+
+        this.pools = pools;
     }
 
 }

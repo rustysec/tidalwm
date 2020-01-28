@@ -11,6 +11,24 @@ var Spiral = class SpiralClass {
         this.windows = [];
     }
 
+    getEffectiveMonitor() {
+        if (this.windows[0]) {
+            this.monitor = this.windows[0].window.get_monitor();
+            return this.windows[0].window.get_monitor();
+        } else {
+            return null;
+        }
+    }
+
+    getEffectiveWorkspace() {
+        if (this.windows[0]) {
+            this.workspace = this.windows[0].window.get_workspace();
+            return this.windows[0].window.get_workspace().index();
+        } else {
+            return null;
+        }
+    }
+
     // adds a window to this spiral group
     addWindow(window) {
         if (window) {

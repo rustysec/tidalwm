@@ -35,6 +35,7 @@ const SETTINGS_SCHEMA = 'org.gnome.shell.extensions.tidalwm';
 var displaySignals = [];
 var settingsSignals = [];
 var monitorSignals = [];
+var workspaceManagerSignals = [];
 var extension;
 
 class Extension {
@@ -152,6 +153,24 @@ class Extension {
             })
         );
 
+        workspaceManagerSignals.push(
+            global.workspace_manager.connect("workspace-added", () => {
+                this._tidal.setupPools();
+            })
+        );
+
+        workspaceManagerSignals.push(
+            global.workspace_manager.connect("workspace-removed", () => {
+                this._tidal.setupPools();
+            })
+        );
+
+        workspaceManagerSignals.push(
+            global.workspace_manager.connect("workspaces-reordered", () => {
+                this._tidal.setupPools();
+            })
+        );
+
         this.addKeyBinding("rotate-windows", (display) => this._tidal.rotateWindows(this._tidal, display));
         this.addKeyBinding("float-window", (display) => this._tidal.floatWindow(this._tidal, display));
     }
@@ -159,6 +178,7 @@ class Extension {
     disable() {
         displaySignals.forEach(signal => global.display.disconnect(signal));
         settingsSignals.forEach(signal => this._settings.disconnect(signal));
+        monitorSignals.forEach(signal => Meta.MonitorManager.get().disconnect(signal));
         this.removeKeyBinding("rotate-windows");
         this.removeKeyBinding("float-window");
         log("Disabled");
@@ -176,7 +196,6 @@ class Extension {
         let actor = window.get_compositor_private();
 
         let id = actor.connect('first-frame', () =>  {
-            log(`first frame achieved: ${window.get_window_type()}`);
             if (window.get_window_type() == 0) {
                 this._tidal.renderWindow(window);
             }
