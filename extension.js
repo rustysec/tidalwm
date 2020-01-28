@@ -34,6 +34,7 @@ const SETTINGS_SCHEMA = 'org.gnome.shell.extensions.tidalwm';
 
 var displaySignals = [];
 var settingsSignals = [];
+var monitorSignals = [];
 var extension;
 
 class Extension {
@@ -136,12 +137,18 @@ class Extension {
                         || op == 20481  // resize (sw)
                         || op == 16385  // resize (s)
                         || op == 32769  // resize (n)
-                        || op == 4097   //  resize (w)
-                        || op == 8193   //  resize (e)
+                        || op == 4097   // resize (w)
+                        || op == 8193   // resize (e)
                         || op == 1)) {  // move
                             this._tidal.resetWindow(window);
                     }
                 }
+            })
+        );
+
+        monitorSignals.push(
+            Meta.MonitorManager.get().connect("monitors-changed", (monitors) => {
+                this._tidal.setupPools();
             })
         );
 
