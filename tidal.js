@@ -198,7 +198,7 @@ var Tidal = class TidalClass {
             let workspace = global.workspace_manager.get_workspace_by_index(i);
 
             for (var j = 0; j < workspace.get_display().get_n_monitors(); j++) {
-                if (!pools[`${i}-${j}`]) {
+                if (!this.pools[`${i}-${j}`]) {
                     this.pools[`${i}-${j}`] = new Me.imports.pool.Pool(this.settings, i, j);
                 }
             }

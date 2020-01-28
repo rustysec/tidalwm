@@ -6,7 +6,7 @@
     "shell-version": [
         "3.34"
     ],
-    "version": 1,
+    "version": 2,
     "url": "https://github.com/rustysec/tidalwm",
     "settings-schema": "org.gnome.shell.extensions.tidalwm",
     "gettext-domain": "tidalwm@rustysec.github.io"
