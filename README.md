@@ -26,7 +26,7 @@ Activate with:
 gnome-shell-extension-prefs
 ```
 Some notes about compatibility:
-- Gtk terminals like gnome-terminal and tilix don't behave well, try using alternatives like kitty or alacritty
+- `gnome-terminal` doesn't behave well, try using alternatives like kitty or alacritty
 
 ## Shortcuts
 #### Float Window
