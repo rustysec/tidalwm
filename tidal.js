@@ -1,6 +1,7 @@
 const Clutter = imports.gi.Clutter;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
+const Spiral = Me.imports.spiral.Spiral;
 
 var Tidal = class TidalClass {
 
@@ -9,23 +10,16 @@ var Tidal = class TidalClass {
         this.settings = settings;
         this.windows = {};
         this.pools = {};
+        this.workspaceSignals = [];
 
-        for (var i = 0; i < global.workspace_manager.get_n_workspaces(); i++) {
-            let workspace = global.workspace_manager.get_workspace_by_index(i);
-
-            workspace.connect("window-added", (workspace, window) => {
-                log(`workspace::window-added ${window.get_id()} ${window.get_window_type()} on ${window.get_monitor()} added to ${workspace.index()}`);
-                this.addWindow(window);
-            });
-
-            workspace.connect("window-removed", (workspace, window) => {
-                log(`workspace::window-removed ${window.get_id()} ${window.get_window_type()} on ${window.get_monitor()} left ${workspace.index()}`);
-                this.removeWindow(window);
-            });
-
-            this.cacheWindows(workspace);
+        let tilingMode = this.settings.get_int("tile-mode");
+        if (tilingMode == 0) {
+            this.poolType = Spiral;
+        } else {
+            log(`unsupported tiling mode ${tilingMode}, using spiral`);
         }
 
+        this.setupWorkspaceSignals();
         this.setupPools();
     }
 
@@ -128,7 +122,6 @@ var Tidal = class TidalClass {
 
     // has the window re-positioned in its container, if it isn't floating
     resetWindow(window) {
-        log(`tidal resetting window ${window.get_id()}`);
         if (window) {
             let id = window.get_id();
             if (this.windows[id] && !this.windows[id].floating) {
@@ -142,7 +135,6 @@ var Tidal = class TidalClass {
     // toggles floating a window by un-tiling and setting always above
     floatWindow(self, display) {
         let id = display.get_focus_window().get_id();
-        log(`toggle floating for active window ${id}`);
 
         let window = self.windows[id];
         if (window && window.floating) {
@@ -190,6 +182,38 @@ var Tidal = class TidalClass {
         }
     }
 
+    setupWorkspaceSignals() {
+        for (var pair in this.workspaceSignals) {
+            if (pair && pair.workspace && pair.signal) {
+                pair.workspace.disconnect(pair.signal);
+            }
+        }
+
+        this.workspaceSignals = [];
+
+        for (var i = 0; i < global.workspace_manager.get_n_workspaces(); i++) {
+            let workspace = global.workspace_manager.get_workspace_by_index(i);
+
+            this.workspaceSignals.push({
+                workspace,
+                signal: workspace.connect("window-added", (workspace, window) => {
+                    log(`workspace::window-added ${window.get_id()} ${window.get_window_type()} on ${window.get_monitor()} added to ${workspace.index()}`);
+                    this.addWindow(window);
+                })
+            });
+
+            this.workspaceSignals.push({
+                workspace,
+                signal: workspace.connect("window-removed", (workspace, window) => {
+                    log(`workspace::window-removed ${window.get_id()} ${window.get_window_type()} on ${window.get_monitor()} left ${workspace.index()}`);
+                    this.removeWindow(window);
+                })
+            });
+
+            this.cacheWindows(workspace);
+        }
+    }
+
     // ensure there is a window pool for each monitor on every workspace
     setupPools() {
         let pools = {};
@@ -206,10 +230,11 @@ var Tidal = class TidalClass {
 
         for (var i = 0; i < global.workspace_manager.get_n_workspaces(); i++) {
             let workspace = global.workspace_manager.get_workspace_by_index(i);
+            this.cacheWindows(workspace);
 
             for (var j = 0; j < workspace.get_display().get_n_monitors(); j++) {
                 if (!pools[`${i}-${j}`]) {
-                    pools[`${i}-${j}`] = new Me.imports.pool.Pool(this.settings, i, j);
+                    pools[`${i}-${j}`] = new this.poolType(this.settings, i, j);
                 }
             }
         }

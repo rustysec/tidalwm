@@ -32,7 +32,7 @@ var Spiral = class SpiralClass {
     // adds a window to this spiral group
     addWindow(window) {
         if (window) {
-            log(`adding window ${window.get_id()} to spiral`);
+            log(`adding window ${window.get_id()} to spiral ${this.workspace}, ${this.monitor}`);
             this.windows.push({
                 window,
                 order: this.windows.length
@@ -44,7 +44,7 @@ var Spiral = class SpiralClass {
     // removes a window from this spiral group
     removeWindow(window) {
         if (window) {
-            log(`removing window ${window.get_id()} from spiral`);
+            log(`removing window ${window.get_id()} from spiral ${this.workspace}, ${this.monitor}`);
             this.windows = this.windows.filter(item => item.window.get_id() != window.get_id());
         }
         this.resetOrdering();
@@ -103,7 +103,6 @@ var Spiral = class SpiralClass {
         let direction = this.settings.get_int("initial-direction");
 
         for (var i = 0; i < this.windows.length; i++) {
-            log(`placing window ${this.windows[i].window.get_id()} with ${direction}`);
             this.windows[i].window.unmaximize(Meta.MaximizeFlags.BOTH);
             this.windows[i].lastSize = {
                 x: work_area.x,
@@ -140,15 +139,12 @@ var Spiral = class SpiralClass {
                 direction = direction ? 0 : 1;
             }
 
-            log(`window size: ${JSON.stringify(this.windows[i].lastSize)}`);
-
             // for some reason this really helps with ensuring the window ends up
             // in the right position, especially if there are other windows opening
             // and closing at the same time. also seems to help with fuzzy fonts
             // appearing in multi-dpi environments.
             let self = this.windows[i];
             let tmpResize = this.windows[i].window.connect("size-changed", (window) => {
-                log(`firing real resize for ${window.get_id()}`);
                 self.window.disconnect(tmpResize);
                 self.window.move_resize_frame(true,
                     self.lastSize.x,
@@ -161,8 +157,8 @@ var Spiral = class SpiralClass {
             this.windows[i].window.move_resize_frame(true,
                 this.windows[i].lastSize.x,
                 this.windows[i].lastSize.y,
-                this.windows[i].lastSize.width,
-                this.windows[i].lastSize.height,
+                this.windows[i].lastSize.width / 2,
+                this.windows[i].lastSize.height / 2,
             );
         }
     }

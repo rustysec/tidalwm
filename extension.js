@@ -119,7 +119,7 @@ class Extension {
         displaySignals.push(
             global.display.connect(
                 "window-entered-monitor", (display, number, window) => {
-                    log(`window ${window.get_id()} ${window.get_wm_class()} entered monitor ${number} on workspace ${window.get_workspace().index()}`);
+                    log(`window ${window.get_id()} entered monitor ${number} on workspace ${window.get_workspace().index()}`);
                     if (window.get_window_type() == 0) {
                         this._tidal.addWindow(window);
                     }
@@ -149,24 +149,28 @@ class Extension {
 
         monitorSignals.push(
             Meta.MonitorManager.get().connect("monitors-changed", (monitors) => {
+                this._tidal.setupWorkspaceSignals();
                 this._tidal.setupPools();
             })
         );
 
         workspaceManagerSignals.push(
             global.workspace_manager.connect("workspace-added", () => {
+                this._tidal.setupWorkspaceSignals();
                 this._tidal.setupPools();
             })
         );
 
         workspaceManagerSignals.push(
             global.workspace_manager.connect("workspace-removed", () => {
+                this._tidal.setupWorkspaceSignals();
                 this._tidal.setupPools();
             })
         );
 
         workspaceManagerSignals.push(
             global.workspace_manager.connect("workspaces-reordered", () => {
+                this._tidal.setupWorkspaceSignals();
                 this._tidal.setupPools();
             })
         );
@@ -185,7 +189,7 @@ class Extension {
     }
 
     gapsChanged(data) {
-        log(`gaps value has changed: ${data.get_value("window-gaps").deep_unpack()}`);
+        log(`gaps value has changed: ${data.get_int("window-gaps")}`);
     }
 
     directionChanged(data) {
