@@ -19,8 +19,9 @@ var Tidal = class TidalClass {
             log(`unsupported tiling mode ${tilingMode}, using spiral`);
         }
 
+        this.pool = new this.poolType(this.settings);
+
         this.setupWorkspaceSignals();
-        this.setupPools();
     }
 
     // adds a window to Tidal's management system
@@ -49,7 +50,7 @@ var Tidal = class TidalClass {
             };
 
             if (rendered && !floating) {
-                this.pools[`${workspace.index()}-${monitor}`].addWindow(window);
+                this.pool.addWindow(window);
             }
 
             this.setWindowOpacities();
@@ -87,7 +88,7 @@ var Tidal = class TidalClass {
             let monitor = window.get_monitor();
 
             this.windows[window.get_id()].rendered = true;
-            this.pools[`${workspace.index()}-${monitor}`].addWindow(window);
+            this.pool.addWindow(window);
 
             let alwaysFloat = this.settings.get_strv("always-float")[0].split(",");
             let wmClass = window.get_wm_class();
@@ -102,12 +103,11 @@ var Tidal = class TidalClass {
     removeWindow(window) {
         if (window.get_window_type() == 0) {
             let id = window.get_id();
+
             let monitor = this.windows[id].monitor;
             let workspace = this.windows[id].workspace;
 
-            this.pools[`${workspace.index()}-${monitor}`].removeWindow(window);
-
-            this.setWindowOpacities();
+            this.pool.removeWindow(window);
         }
     }
 
@@ -125,9 +125,7 @@ var Tidal = class TidalClass {
         if (window) {
             let id = window.get_id();
             if (this.windows[id] && !this.windows[id].floating) {
-                let workspace = window.get_workspace().index();
-                let display = window.get_monitor();
-                this.pools[`${workspace}-${display}`].resetWindow(window);
+                this.pool.resetWindow(window);
             }
         }
     }
@@ -213,33 +211,4 @@ var Tidal = class TidalClass {
             this.cacheWindows(workspace);
         }
     }
-
-    // ensure there is a window pool for each monitor on every workspace
-    setupPools() {
-        let pools = {};
-
-        for (var pool in this.pools) {
-            let current = this.pools[pool];
-            let monitor = current.getEffectiveMonitor();
-            let workspace = current.getEffectiveWorkspace();
-            if (monitor !== null && workspace !== null) {
-                pools[`${workspace}-${monitor}`] = current;
-            }
-        }
-
-
-        for (var i = 0; i < global.workspace_manager.get_n_workspaces(); i++) {
-            let workspace = global.workspace_manager.get_workspace_by_index(i);
-            this.cacheWindows(workspace);
-
-            for (var j = 0; j < workspace.get_display().get_n_monitors(); j++) {
-                if (!pools[`${i}-${j}`]) {
-                    pools[`${i}-${j}`] = new this.poolType(this.settings, i, j);
-                }
-            }
-        }
-
-        this.pools = pools;
-    }
-
 }

@@ -4,68 +4,68 @@ const HORIZONTAL = 0;
 const VERTICAL = 1;
 
 var Spiral = class SpiralClass {
-    constructor(settings, workspace, monitor) {
+    constructor(settings) {
         this.settings = settings;
-        this.workspace = workspace;
-        this.monitor = monitor;
-        this.windows = [];
-    }
-
-    getEffectiveMonitor() {
-        if (this.windows[0]) {
-            this.monitor = this.windows[0].window.get_monitor();
-            return this.windows[0].window.get_monitor();
-        } else {
-            return null;
-        }
-    }
-
-    getEffectiveWorkspace() {
-        if (this.windows[0]) {
-            this.workspace = this.windows[0].window.get_workspace();
-            return this.windows[0].window.get_workspace().index();
-        } else {
-            return null;
-        }
+        this.windows = {};
     }
 
     // adds a window to this spiral group
     addWindow(window) {
         if (window) {
-            log(`adding window ${window.get_id()} to spiral ${this.workspace}, ${this.monitor}`);
-            this.windows.push({
+            let id = window.get_id();
+            let workspace = window.get_workspace().index();
+            let monitor = window.get_monitor();
+
+            log(`adding window ${window.get_id()} to spiral ${workspace}, ${monitor}`);
+            this.windows[id] = {
+                id: window.get_id(),
                 window,
-                order: this.windows.length
-            });
+                workspace,
+                monitor,
+                order: Object.values(this.windows).filter(
+                    w => w.window.get_workspace().index() === workspace &&
+                    w.window.get_monitor() === monitor
+                ).length,
+            };
+
+            this.resetOrdering(workspace, monitor);
+            this.spiralWindows(workspace, monitor);
         }
-        this.spiralWindows();
     }
 
     // removes a window from this spiral group
     removeWindow(window) {
         if (window) {
-            log(`removing window ${window.get_id()} from spiral ${this.workspace}, ${this.monitor}`);
-            this.windows = this.windows.filter(item => item.window.get_id() != window.get_id());
+            let id = window.get_id();
+            let filtered = this.windows[id];
+            if (filtered) {
+                let { workspace, monitor } = filtered;
+                log(`removing window ${id} from spiral ${workspace}, ${monitor}`);
+                delete this.windows[id];
+
+                this.resetOrdering(workspace, monitor);
+                this.spiralWindows(workspace, monitor);
+            }
         }
-        this.resetOrdering();
-        this.spiralWindows();
     }
 
     // zero index the ordering and make sure it's contiguous 
-    resetOrdering() {
-        this.windows.sort((a, b) => {
-            if (a.order > b.order) return 1;
-            if (a.order < b.order) return -1;
-            return 0;
-        })
-        .forEach((item, index) => {
-            item.order = index;
-        });
+    resetOrdering(workspace, monitor) {
+        Object.values(this.windows)
+            .filter(item => item.workspace === workspace && item.monitor === monitor)
+            .sort((a, b) => {
+                if (a.order > b.order) return 1;
+                if (a.order < b.order) return -1;
+                return 0;
+            })
+            .forEach((item, index) => {
+                item.order = index;
+            });
     }
 
     // use the window's last known position and resize/reposition it
     resetWindow(window) {
-        let item = this.windows.filter(item => item.window.get_id() == window.get_id())[0];
+        let item = this.windows[window.get_id()];
         if (item) {
             item.window.move_resize_frame(true,
                 item.lastSize.x,
@@ -76,10 +76,20 @@ var Spiral = class SpiralClass {
         }
     }
 
+    getSortedWindows(workspace, monitor) {
+        return Object.values(this.windows)
+            .filter(item => item.workspace === workspace && item.monitor === monitor)
+            .sort((a, b) => {
+                if (a.order > b.order) return 1;
+                if (a.order < b.order) return -1;
+                return 0;
+            });
+    }
+
     // take the windows being managed together and places them via the spiral
     // algorithm
-    spiralWindows() {
-        if (!this.windows || !this.windows.length) {
+    spiralWindows(workspace, monitor) {
+        if (!this.windows || !Object.values(this.windows).length) {
             return;
         }
 
@@ -87,13 +97,12 @@ var Spiral = class SpiralClass {
 
         let gaps = (smartGaps && this.windows.length == 1) ? 0 :
             this.settings.get_int("window-gaps") *
-            global.workspace_manager.get_workspace_by_index(this.workspace)
+            global.workspace_manager.get_workspace_by_index(workspace)
                 .get_display()
-                .get_monitor_scale(this.monitor);
+                .get_monitor_scale(monitor);
 
-        let workspace = global.workspace_manager.get_workspace_by_index(this.workspace);
-        let work_area = workspace
-            .get_work_area_for_monitor(this.monitor);
+        let ws = global.workspace_manager.get_workspace_by_index(workspace);
+        let work_area = ws.get_work_area_for_monitor(monitor);
 
         work_area.x = work_area.x + gaps;
         work_area.y = work_area.y + gaps;
@@ -102,35 +111,37 @@ var Spiral = class SpiralClass {
 
         let direction = this.settings.get_int("initial-direction");
 
-        for (var i = 0; i < this.windows.length; i++) {
-            this.windows[i].window.unmaximize(Meta.MaximizeFlags.BOTH);
-            this.windows[i].lastSize = {
+        let windows = this.getSortedWindows(workspace, monitor);
+
+        for (var i = 0; i < windows.length; i++) {
+            windows[i].window.unmaximize(Meta.MaximizeFlags.BOTH);
+            windows[i].lastSize = {
                 x: work_area.x,
                 y: work_area.y,
                 width: work_area.width,
                 height: work_area.height
             };
 
-            if (this.windows.length > 1) {
+            if (windows.length > 1) {
                 // needs bisecting
                 if (direction == HORIZONTAL) {
                     let new_width = (work_area.width / 2) - (gaps / 2);
-                    this.windows[i].lastSize.x = work_area.x;
-                    this.windows[i].lastSize.y = work_area.y;
-                    this.windows[i].lastSize.width =
-                        (i < this.windows.length -1) ? new_width : work_area.width;
-                    this.windows[i].lastSize.height = work_area.height;
+                    windows[i].lastSize.x = work_area.x;
+                    windows[i].lastSize.y = work_area.y;
+                    windows[i].lastSize.width =
+                        (i < windows.length -1) ? new_width : work_area.width;
+                    windows[i].lastSize.height = work_area.height;
 
                     // adjust for the next window
                     work_area.x = work_area.x + gaps + new_width;
                     work_area.width = new_width;
                 } else {
                     let new_height = (work_area.height / 2) - (gaps / 2);
-                    this.windows[i].lastSize.x = work_area.x;
-                    this.windows[i].lastSize.y = work_area.y;
-                    this.windows[i].lastSize.width = work_area.width;
-                    this.windows[i].lastSize.height = 
-                        (i < this.windows.length - 1) ? new_height : work_area.height;
+                    windows[i].lastSize.x = work_area.x;
+                    windows[i].lastSize.y = work_area.y;
+                    windows[i].lastSize.width = work_area.width;
+                    windows[i].lastSize.height = 
+                        (i < windows.length - 1) ? new_height : work_area.height;
 
                     // adjust for the next window
                     work_area.y = work_area.y + gaps + new_height;
@@ -143,8 +154,8 @@ var Spiral = class SpiralClass {
             // in the right position, especially if there are other windows opening
             // and closing at the same time. also seems to help with fuzzy fonts
             // appearing in multi-dpi environments.
-            let self = this.windows[i];
-            let tmpResize = this.windows[i].window.connect("size-changed", (window) => {
+            let self = windows[i];
+            let tmpResize = windows[i].window.connect("size-changed", (window) => {
                 self.window.disconnect(tmpResize);
                 self.window.move_resize_frame(true,
                     self.lastSize.x,
@@ -154,11 +165,11 @@ var Spiral = class SpiralClass {
                 );
             });
 
-            this.windows[i].window.move_resize_frame(true,
-                this.windows[i].lastSize.x,
-                this.windows[i].lastSize.y,
-                this.windows[i].lastSize.width / 2,
-                this.windows[i].lastSize.height / 2,
+            windows[i].window.move_resize_frame(true,
+                windows[i].lastSize.x,
+                windows[i].lastSize.y,
+                windows[i].lastSize.width,
+                windows[i].lastSize.height,
             );
         }
     }
@@ -166,6 +177,11 @@ var Spiral = class SpiralClass {
     // rotates windows through the spiral. what is in the last position 
     // is moved to the first and everything is shifted one position over.
     rotateWindows() {
+        let {workspace, monitor} = global.get_window_actors().filter(actor => {
+            let meta = actor.get_meta_window();
+            return meta && meta.get_window_type() == 0 && meta.appears_focused;
+        })[0];
+
         let tmpWindows = this.windows.reverse();
         for (var i = 0; i < tmpWindows.length; i++) {
             if (i == 0) {
@@ -175,7 +191,7 @@ var Spiral = class SpiralClass {
             }
         }
         this.windows = tmpWindows;
-        this.resetOrdering();
-        this.spiralWindows();
+        this.resetOrdering(workspace, monitor);
+        this.spiralWindows(workspace, monitor);
     }
 }

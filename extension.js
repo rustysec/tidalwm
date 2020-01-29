@@ -150,28 +150,24 @@ class Extension {
         monitorSignals.push(
             Meta.MonitorManager.get().connect("monitors-changed", (monitors) => {
                 this._tidal.setupWorkspaceSignals();
-                this._tidal.setupPools();
             })
         );
 
         workspaceManagerSignals.push(
             global.workspace_manager.connect("workspace-added", () => {
                 this._tidal.setupWorkspaceSignals();
-                this._tidal.setupPools();
             })
         );
 
         workspaceManagerSignals.push(
             global.workspace_manager.connect("workspace-removed", () => {
                 this._tidal.setupWorkspaceSignals();
-                this._tidal.setupPools();
             })
         );
 
         workspaceManagerSignals.push(
             global.workspace_manager.connect("workspaces-reordered", () => {
                 this._tidal.setupWorkspaceSignals();
-                this._tidal.setupPools();
             })
         );
 
