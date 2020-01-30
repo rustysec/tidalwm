@@ -129,7 +129,8 @@ var Tidal = class TidalClass {
 
     windowLeftMonitor(window, monitor) {
         if (this.windows[window.get_id()]) {
-            log(`tidal.js: window ${window.get_id()} left monitor ${monitor}`);
+            log(`tidal.js: window ${window.get_id()} left monitor ${monitor} -> ${window.get_monitor()}`);
+            this.pool.updateWindow(window);
         }
     }
 

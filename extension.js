@@ -103,12 +103,12 @@ class Extension {
                     if (window.get_workspace()) {
                         //log(`extension.js: window ${window.get_id()} left monitor ${number} on workspace ${window.get_workspace().index()} (now on ${number})`);
                         if (window.get_window_type() == 0) {
-                            //this._tidal.windowLeftMonitor(window, number);
+                            this._tidal.windowLeftMonitor(window, number);
                         }
                     } else {
                         //log(`extension.js: window ${window.get_id()} closed`);
                         if (window.get_window_type() == 0) {
-                            //this._tidal.closeWindow(window);
+                            this._tidal.closeWindow(window);
                         }
                     }
                 }

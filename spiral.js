@@ -41,6 +41,18 @@ var Spiral = class SpiralClass {
     }
 
     // removes a window from this spiral group
+    removeWindow(window) {
+        let id = window.get_id();
+
+        if (this.windows[id]) {
+            let { workspace, monitor } = this.windows[id];
+            delete this.windows[id];
+            this.resetOrdering(workspace, monitor);
+            this.execute(workspace, monitor);
+        }
+    }
+
+    // calculate where a window is vs where it was, update both
     updateWindow(window) {
         if (window) {
             let id = window.get_id();
@@ -86,12 +98,16 @@ var Spiral = class SpiralClass {
             let workspace = window.get_workspace().index();
             let monitor = window.get_monitor();
 
+            this.execute(workspace, monitor);
+
+            /*
             item.window.move_resize_frame(true,
                 item.lastSize.x,
                 item.lastSize.y,
                 item.lastSize.width,
                 item.lastSize.height,
             );
+            */
         }
     }
 
@@ -198,12 +214,23 @@ var Spiral = class SpiralClass {
     // rotates windows through the spiral. what is in the last position 
     // is moved to the first and everything is shifted one position over.
     rotateWindows() {
-        let {workspace, monitor} = global.get_window_actors().filter(actor => {
+        let window = global.get_window_actors().filter(actor => {
             let meta = actor.get_meta_window();
             return meta && meta.get_window_type() == 0 && meta.appears_focused;
-        })[0];
+        });
 
-        let tmpWindows = this.windows.reverse();
+        if (!window)
+            return;
+
+        window = window[0].get_meta_window();
+
+        if (!window || !this.windows[window.get_id()])
+            return;
+
+        let {workspace, monitor} = this.windows[window.get_id()];
+        log(`spiral.js: rotating windows on ${workspace}, ${monitor}`);
+
+        let tmpWindows = this.getSortedWindows(workspace, monitor).reverse();
         for (var i = 0; i < tmpWindows.length; i++) {
             if (i == 0) {
                 tmpWindows[i].order = 0;
@@ -211,7 +238,12 @@ var Spiral = class SpiralClass {
                 tmpWindows[i].order += 1;
             }
         }
-        this.windows = tmpWindows;
+        tmpWindows.forEach(window => {
+            let id = window.window.get_id();
+            log(`spiral.js: rotating ${id} from ${this.windows[id].order} to ${window.order}`);
+            this.windows[id].order = window.order;
+        });
+
         this.resetOrdering(workspace, monitor);
         this.execute(workspace, monitor);
     }
