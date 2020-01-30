@@ -1,4 +1,6 @@
 const Clutter = imports.gi.Clutter;
+const GObject = imports.gi.GObject;
+
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Spiral = Me.imports.spiral.Spiral;
@@ -6,22 +8,18 @@ const Spiral = Me.imports.spiral.Spiral;
 var Tidal = class TidalClass {
 
     constructor(settings) {
-        log(`Constructing new TidalWM`);
         this.settings = settings;
         this.windows = {};
-        this.pools = {};
-        this.workspaceSignals = [];
 
         let tilingMode = this.settings.get_int("tile-mode");
         if (tilingMode == 0) {
             this.poolType = Spiral;
         } else {
-            log(`unsupported tiling mode ${tilingMode}, using spiral`);
+            log(`tidal.js: unsupported tiling mode ${tilingMode}, using spiral`);
         }
 
         this.pool = new this.poolType(this.settings);
-
-        this.setupWorkspaceSignals();
+        this.initWorkspace();
     }
 
     // adds a window to Tidal's management system
@@ -30,12 +28,16 @@ var Tidal = class TidalClass {
 
         // only handle normal windows for now
         if (windowType == 0) {
-            let id = window.get_id();
-            let workspace = window.get_workspace();
-            let monitor = window.get_monitor();
+            log(`tidal.js: adding window ${window.get_id()}`);
 
-            let rendered = this.windows[id] && this.windows[id].rendered;
-            let floating = this.windows[id] && this.windows[id].floating;
+            let id = window.get_id();
+            let workspace = window.get_workspace().index();
+            let monitor = window.get_monitor();
+            let isFloating = this.windows[id] && this.windows[id].floating;
+
+            let alwaysFloat = this.settings.get_strv("always-float")[0].split(",");
+            let wmClass = window.get_wm_class();
+            let floating = isFloating || alwaysFloat.includes(wmClass);
 
             let tidal = this;
             window.connect("focus", (window) => this.windowFocusChanged(tidal, window));
@@ -45,11 +47,10 @@ var Tidal = class TidalClass {
                 workspace,
                 monitor,
                 window,
-                rendered,
                 floating
             };
 
-            if (rendered && !floating) {
+            if (!floating) {
                 this.pool.addWindow(window);
             }
 
@@ -81,22 +82,11 @@ var Tidal = class TidalClass {
         });
     }
 
-    // signal that a window is ready to be operated on
-    renderWindow(window) {
-        if (window.get_window_type() == 0) {
-            let workspace = window.get_workspace();
-            let monitor = window.get_monitor();
-
-            this.windows[window.get_id()].rendered = true;
-            this.pool.addWindow(window);
-
-            let alwaysFloat = this.settings.get_strv("always-float")[0].split(",");
-            let wmClass = window.get_wm_class();
-
-            if (alwaysFloat.includes(wmClass)) {
-                this.floatWindow(this, window.get_display());
-            }
-        }
+    closeWindow(window) {
+        let id = window.get_id();
+        log(`tidal.js: closing window ${id}`);
+        this.pool.removeWindow(window);
+        delete this.windows[id];
     }
 
     // removes the window from being managed by a pool
@@ -108,15 +98,6 @@ var Tidal = class TidalClass {
             let workspace = this.windows[id].workspace;
 
             this.pool.removeWindow(window);
-        }
-    }
-
-    // removes the window from Tidal's management completely
-    closeWindow(window) {
-        if (window.get_window_type() == 0) {
-            this.removeWindow(window);
-            let id = window.get_id();
-            delete this.windows[id];
         }
     }
 
@@ -146,13 +127,26 @@ var Tidal = class TidalClass {
         }
     }
 
+    windowLeftMonitor(window, monitor) {
+        if (this.windows[window.get_id()]) {
+            log(`tidal.js: window ${window.get_id()} left monitor ${monitor} -> ${window.get_monitor()}`);
+            this.pool.updateWindow(window);
+        }
+    }
+
+    windowEnteredMonitor(window, monitor) {
+        if (this.windows[window.get_id()]) {
+            log(`tidal.js: window ${window.get_id()} entered monitor ${monitor}`);
+        }
+    }
+
     // rotate the windows through the tiling algo
     rotateWindows(self, display) {
         let focused = display.get_focus_window();
         if (focused) {
             let workspace = focused.get_workspace().index();
             let monitor = focused.get_monitor();
-            self.pools[`${workspace}-${monitor}`].rotateWindows();
+            self.pool.rotateWindows(workspace, monitor);
         }
     }
 
@@ -177,38 +171,48 @@ var Tidal = class TidalClass {
                         };
                     }
                 });
+        } else {
+            for (var i = 0; i < global.workspace_manager.get_n_workspaces(); i++) {
+                this.cacheWindows(global.workspace_manager.get_workspace_by_index(i));
+            }
         }
     }
 
-    setupWorkspaceSignals() {
-        for (var pair in this.workspaceSignals) {
-            if (pair && pair.workspace && pair.signal) {
-                pair.workspace.disconnect(pair.signal);
-            }
+    windowAdded(workspace, window) {
+        let id = window.get_id();
+        let item  = this.windows[id];
+
+        if (item) {
+            let newWorkspace = window.get_workspace().index();
+            let newMonitor = window.get_monitor();
+
+            log(`tidal.js: window ${id} added to ${newWorkspace}, ${newMonitor}`);
+            this.pool.updateWindow(window);
         }
+    }
 
-        this.workspaceSignals = [];
+    windowRemoved(workspace, window) {
+        let id = window.get_id();
+        let item  = this.windows[id];
 
-        for (var i = 0; i < global.workspace_manager.get_n_workspaces(); i++) {
-            let workspace = global.workspace_manager.get_workspace_by_index(i);
+        item.oldWorkspace = item.workspace;
+        item.oldMonitor = item.monitor;
 
-            this.workspaceSignals.push({
-                workspace,
-                signal: workspace.connect("window-added", (workspace, window) => {
-                    log(`workspace::window-added ${window.get_id()} ${window.get_window_type()} on ${window.get_monitor()} added to ${workspace.index()}`);
-                    this.addWindow(window);
-                })
-            });
+        item.workspace = window.get_workspace().index();
+        item.monitor = window.get_monitor();
 
-            this.workspaceSignals.push({
-                workspace,
-                signal: workspace.connect("window-removed", (workspace, window) => {
-                    log(`workspace::window-removed ${window.get_id()} ${window.get_window_type()} on ${window.get_monitor()} left ${workspace.index()}`);
-                    this.removeWindow(window);
-                })
-            });
+        log(`tidal.js: window ${id} removed from ${item.workspace}, ${item.monitor}`);
+    }
 
-            this.cacheWindows(workspace);
+    initWorkspace(workspace) {
+        if (workspace !== undefined && workspace !== null) {
+            log(`tidal.js: initializing workspace ${workspace}`);
+            global.workspace_manager.get_workspace_by_index(workspace).connect("window-added", (ws, w) => this.windowAdded(ws, w));
+            global.workspace_manager.get_workspace_by_index(workspace).connect("window-removed", (ws, w) => this.windowRemoved(ws, w));
+        } else {
+            for (var i = 0; i < global.workspace_manager.get_n_workspaces(); i++) {
+                this.initWorkspace(i);
+            }
         }
     }
 }

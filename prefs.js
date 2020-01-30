@@ -179,7 +179,7 @@ function buildPrefsWidget() {
     });
     rotateEntry.set_text(this.settings.get_strv("rotate-windows")[0]);
     prefsWidget.attach(rotateEntry, 1, 7, 1, 1);
-    rotateEntry.connect('changed', () => this.settings.set_strv("rotate-window", [rotateEntry.get_text()]));
+    rotateEntry.connect('changed', () => this.settings.set_strv("rotate-windows", [rotateEntry.get_text()]));
 
     /*** Always Float ***/
     label = new Gtk.Label({
