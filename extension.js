@@ -53,9 +53,7 @@ class Extension {
         return settings;
     }
 
-    constructor() {
-        log("TidalWM constructed");
-    }
+    constructor() {}
 
     enable() {
         this._settings = this.getSettings(SETTINGS_SCHEMA);
@@ -91,8 +89,9 @@ class Extension {
             global.display.connect(
                 "window-created",
                 (display, window) => {
-                    let number = window.get_monitor();
-                    log(`window ${window.get_id()} created monitor ${number} on workspace ${window.get_workspace().index()}`);
+                    let monitor = window.get_monitor();
+                    let workspace = window.get_workspace().index();
+                    //log(`extension.js: window ${window.get_id()} created on monitor ${monitor} on workspace ${workspace}`);
                     this.windowCreated(window);
                 }
             )
@@ -102,14 +101,14 @@ class Extension {
             global.display.connect(
                 "window-left-monitor", (display, number, window) => {
                     if (window.get_workspace()) {
-                        log(`window ${window.get_id()} left monitor ${number} on workspace ${window.get_workspace().index()}`);
+                        //log(`extension.js: window ${window.get_id()} left monitor ${number} on workspace ${window.get_workspace().index()} (now on ${number})`);
                         if (window.get_window_type() == 0) {
-                            this._tidal.removeWindow(window);
+                            //this._tidal.windowLeftMonitor(window, number);
                         }
                     } else {
-                        log(`window ${window.get_id()} closed`);
+                        //log(`extension.js: window ${window.get_id()} closed`);
                         if (window.get_window_type() == 0) {
-                            this._tidal.closeWindow(window);
+                            //this._tidal.closeWindow(window);
                         }
                     }
                 }
@@ -119,9 +118,9 @@ class Extension {
         displaySignals.push(
             global.display.connect(
                 "window-entered-monitor", (display, number, window) => {
-                    log(`window ${window.get_id()} entered monitor ${number} on workspace ${window.get_workspace().index()}`);
+                    //log(`extension.js: window ${window.get_id()} entered monitor ${number} on workspace ${window.get_workspace().index()}`);
                     if (window.get_window_type() == 0) {
-                        this._tidal.addWindow(window);
+                        //this._tidal.windowEnteredMonitor(window, number);
                     }
                 }
             )
@@ -130,7 +129,7 @@ class Extension {
         displaySignals.push(
             global.display.connect("grab-op-end", (obj, display, window, op) => {
                 if (window && window.get_window_type() == 0) { 
-                    log(`grab op ${op} ended for ${window} ${window.get_window_type()}`);
+                    log(`extension.js: grab op ${op} ended for ${window.get_id()} ${window.get_window_type()}`);
                     if (window &&
                         (op == 36865    // resize (nw)
                         || op == 40961  // resize (ne)
@@ -149,25 +148,26 @@ class Extension {
 
         monitorSignals.push(
             Meta.MonitorManager.get().connect("monitors-changed", (monitors) => {
-                this._tidal.setupWorkspaceSignals();
+                /// placeholder
             })
         );
 
         workspaceManagerSignals.push(
-            global.workspace_manager.connect("workspace-added", () => {
-                this._tidal.setupWorkspaceSignals();
+            global.workspace_manager.connect("workspace-added", (manager, workspace) => {
+                /// placeholder
+                this._tidal.initWorkspace(workspace);
             })
         );
 
         workspaceManagerSignals.push(
-            global.workspace_manager.connect("workspace-removed", () => {
-                this._tidal.setupWorkspaceSignals();
+            global.workspace_manager.connect("workspace-removed", (manager, workspace) => {
+                /// placeholder
             })
         );
 
         workspaceManagerSignals.push(
             global.workspace_manager.connect("workspaces-reordered", () => {
-                this._tidal.setupWorkspaceSignals();
+                /// placeholder
             })
         );
 
@@ -185,11 +185,11 @@ class Extension {
     }
 
     gapsChanged(data) {
-        log(`gaps value has changed: ${data.get_int("window-gaps")}`);
+        log(`extension.js: gaps value has changed: ${data.get_int("window-gaps")}`);
     }
 
     directionChanged(data) {
-        log(`initial direction changed ${data.get_int("initial-direction")}`);
+        log(`extension.js: initial direction changed ${data.get_int("initial-direction")}`);
     }
 
     windowCreated(window) {
@@ -197,7 +197,8 @@ class Extension {
 
         let id = actor.connect('first-frame', () =>  {
             if (window.get_window_type() == 0) {
-                this._tidal.renderWindow(window);
+                log(`extension.js: window ${window.get_id()} created`);
+                this._tidal.addWindow(window);
             }
             actor.disconnect(id);
         });
