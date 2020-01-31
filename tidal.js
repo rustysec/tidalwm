@@ -229,4 +229,13 @@ var Tidal = class TidalClass {
             }
         }
     }
+
+    refreshWorkspace() {
+        let workspace = global.workspace_manager.get_active_workspace();
+        let index = workspace.index();
+
+        for (var monitor = 0; monitor < workspace.get_display().get_n_monitors(); monitor++) {
+            this.pool.execute(index, monitor);
+        }
+    }
 }

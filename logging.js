@@ -2,7 +2,7 @@ var Logging = class LoggingClass {
     constructor(settings) {
         this.settings = settings;
         this.logLevel = this.settings.get_int("log-level") || 0;
-        this.settings.connect
+        this.log(`logging.js: log level set to ${this.logLevel}`);
     }
 
     verbose(msg) {

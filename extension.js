@@ -126,7 +126,7 @@ class Extension {
         displaySignals.push(
             global.display.connect(
                 "window-entered-monitor", (display, number, window) => {
-                    //this.log(`extension.js: window ${window.get_id()} entered monitor ${number} on workspace ${window.get_workspace().index()}`);
+                    this.log.verbose(`extension.js: window ${window.get_id()} entered monitor ${number} on workspace ${window.get_workspace().index()}`);
                     if (window.get_window_type() == 0) {
                         //this._tidal.windowEnteredMonitor(window, number);
                     }
@@ -137,7 +137,7 @@ class Extension {
         displaySignals.push(
             global.display.connect("grab-op-end", (obj, display, window, op) => {
                 if (window && window.get_window_type() == 0) { 
-                    //this.log(`extension.js: grab op ${op} ended for ${window.get_id()}`);
+                    this.log.verbose(`extension.js: grab op ${op} ended for ${window.get_id()}`);
                     if (window &&
                         (op == 36865        // resize (nw)
                         || op == 40961      // resize (ne)
@@ -177,6 +177,13 @@ class Extension {
         workspaceManagerSignals.push(
             global.workspace_manager.connect("workspaces-reordered", () => {
                 /// placeholder
+            })
+        );
+
+        workspaceManagerSignals.push(
+            global.workspace_manager.connect("active-workspace-changed", () => {
+                /// placeholder
+                this._tidal.refreshWorkspace();
             })
         );
 
