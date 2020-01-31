@@ -77,7 +77,7 @@ var Tidal = class TidalClass {
     // walk the window list and adjust opacities accordingly
     setWindowOpacities() {
         let opacity = (this.settings.get_int("inactive-opacity") / 100) * 255;
-        let highlight = this.settings.get_bool("highlight-active") && this.activeHighlight;
+        let highlight = this.settings.get_boolean("highlight-active") && this.activeHighlight;
 
         if (highlight) {
             this.activeHighlight.hide();

@@ -228,7 +228,7 @@ function buildPrefsWidget() {
     prefsWidget.attach(radio_vertical, 1, row, 1, 1);
     row += 1;
 
-    /*** Initial Split Direction ***/
+    /*** Logging Levels ***/
     label = new Gtk.Label({
         label: 'Logging level:',
         halign: Gtk.Align.START,
@@ -251,7 +251,7 @@ function buildPrefsWidget() {
     prefsWidget.attach(radio_logging_verbose, 1, row, 1, 1);
     row += 1;
 
-    /** Smart Gaps **/
+    /** Highlight Active **/
     label = new Gtk.Label({
         label: 'Highlight Active Window:',
         halign: Gtk.Align.START,
