@@ -7,8 +7,9 @@ const Spiral = Me.imports.spiral.Spiral;
 
 var Tidal = class TidalClass {
 
-    constructor(settings) {
+    constructor(settings, logging) {
         this.settings = settings;
+        this.log = logging;
         this.windows = {};
 
         let tilingMode = this.settings.get_int("tile-mode");
@@ -18,7 +19,7 @@ var Tidal = class TidalClass {
             log(`tidal.js: unsupported tiling mode ${tilingMode}, using spiral`);
         }
 
-        this.pool = new this.poolType(this.settings);
+        this.pool = new this.poolType(this.settings, this.log);
         this.initWorkspace();
     }
 
@@ -202,6 +203,9 @@ var Tidal = class TidalClass {
     windowRemoved(workspace, window) {
         let id = window.get_id();
         let item  = this.windows[id];
+
+        if (!item)
+            return;
 
         item.oldWorkspace = item.workspace;
         item.oldMonitor = item.monitor;
