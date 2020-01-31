@@ -12,6 +12,8 @@ function init() {
 
 function buildPrefsWidget() {
 
+    let row = 0;
+
     // Copy the same GSettings code from `extension.js`
     let gschema = Gio.SettingsSchemaSource.new_from_directory(
         Me.dir.get_child('schemas').get_path(),
@@ -42,7 +44,8 @@ function buildPrefsWidget() {
         use_markup: true,
         visible: true
     });
-    prefsWidget.attach(title, 0, 0, 2, 1);
+    prefsWidget.attach(title, 0, row, 2, 1);
+    row += 1;
 
     /*** Reset ***/
     let buttonLabel = new Gtk.Label({
@@ -50,15 +53,16 @@ function buildPrefsWidget() {
         halign: Gtk.Align.START,
         visible: true
     });
-    prefsWidget.attach(buttonLabel, 0, 1, 1, 1);
+    prefsWidget.attach(buttonLabel, 0, row, 1, 1);
 
     let button = new Gtk.Button({
         label: 'Reset',
         visible: true
     });
-    prefsWidget.attach(button, 1, 1, 1, 1);
+    prefsWidget.attach(button, 1, row, 1, 1);
 
     button.connect('clicked', (button) => this.settings.reset('window-gaps'));
+    row += 1;
 
     /*** Gaps Settings ***/
     let toggleLabel = new Gtk.Label({
@@ -66,7 +70,7 @@ function buildPrefsWidget() {
         halign: Gtk.Align.START,
         visible: true
     });
-    prefsWidget.attach(toggleLabel, 0, 2, 1, 1);
+    prefsWidget.attach(toggleLabel, 0, row, 1, 1);
 
     let gaps_adjustment = new Gtk.Adjustment({
         lower: 0,
@@ -84,8 +88,9 @@ function buildPrefsWidget() {
         input_purpose: "number",
         adjustment: gaps_adjustment,
     });
-    prefsWidget.attach(gaps, 1, 2, 1, 1);
+    prefsWidget.attach(gaps, 1, row, 1, 1);
     gaps.connect('value-changed', () => this.settings.set_int("window-gaps", gaps.get_value()));
+    row += 1;
 
     /** Smart Gaps **/
     let label = new Gtk.Label({
@@ -93,17 +98,18 @@ function buildPrefsWidget() {
         halign: Gtk.Align.START,
         visible: true
     });
-    prefsWidget.attach(label, 0, 3, 1, 1);
+    prefsWidget.attach(label, 0, row, 1, 1);
     let smartGapsSwitch = new Gtk.Switch({
         active: this.settings.get_boolean('smart-gaps'),
         halign: Gtk.Align.START,
         visible: true
     });
-    prefsWidget.attach(smartGapsSwitch, 1, 3, 1, 1);
+    prefsWidget.attach(smartGapsSwitch, 1, row, 1, 1);
     smartGapsSwitch.connect('state-set', (t) => {
         this.settings.set_boolean("smart-gaps", smartGapsSwitch.get_active());
         this.settings.apply();
     });
+    row += 1;
 
     /*** Tiling Mode ***/
     let tileModeLabel = new Gtk.Label({
@@ -111,7 +117,7 @@ function buildPrefsWidget() {
         halign: Gtk.Align.START,
         visible: true
     });
-    prefsWidget.attach(tileModeLabel, 0, 4, 1, 1); 
+    prefsWidget.attach(tileModeLabel, 0, row, 1, 1); 
 
     let radio_spiral = new Gtk.RadioButton({label: 'Spiral', visible: true});
     let radio_binary = new Gtk.RadioButton({label: 'Binary', visible: true, group: radio_spiral});
@@ -121,9 +127,12 @@ function buildPrefsWidget() {
     radio_binary.set_sensitive(false);
     radio_i3.set_sensitive(false);
 
-    prefsWidget.attach(radio_spiral, 1, 4, 1, 1);
-    prefsWidget.attach(radio_binary, 2, 4, 1, 1);
-    prefsWidget.attach(radio_i3, 3, 4, 1, 1);
+    prefsWidget.attach(radio_spiral, 1, row, 1, 1);
+    row += 1;
+    prefsWidget.attach(radio_binary, 1, row, 1, 1);
+    row += 1;
+    prefsWidget.attach(radio_i3, 1, row, 1, 1);
+    row += 1;
 
     /*** Inactive Opacity ***/
     let inactiveOpacity = new Gtk.Label({
@@ -131,7 +140,7 @@ function buildPrefsWidget() {
         halign: Gtk.Align.START,
         visible: true
     });
-    prefsWidget.attach(inactiveOpacity, 0, 5, 1, 1);
+    prefsWidget.attach(inactiveOpacity, 0, row, 1, 1);
 
     let inactive_opacity_adjustment = new Gtk.Adjustment({
         lower: 5,
@@ -149,8 +158,9 @@ function buildPrefsWidget() {
         input_purpose: "number",
         adjustment: inactive_opacity_adjustment,
     });
-    prefsWidget.attach(opacity, 1, 5, 1, 1);
+    prefsWidget.attach(opacity, 1, row, 1, 1);
     opacity.connect('value-changed', () => this.settings.set_int("inactive-opacity", opacity.get_value()));
+    row += 1;
 
     /*** Hotkeys ***/
     label = new Gtk.Label({
@@ -158,28 +168,30 @@ function buildPrefsWidget() {
         halign: Gtk.Align.START,
         visible: true
     });
-    prefsWidget.attach(label, 0, 6, 1, 1);
+    prefsWidget.attach(label, 0, row, 1, 1);
 
     let floatEntry = new Gtk.Entry({
         visible: true
     });
     floatEntry.set_text(this.settings.get_strv("float-window")[0]);
-    prefsWidget.attach(floatEntry, 1, 6, 1, 1);
+    prefsWidget.attach(floatEntry, 1, row, 1, 1);
     floatEntry.connect('changed', () => this.settings.set_strv("float-window", [floatEntry.get_text()]));
+    row += 1;
 
     label = new Gtk.Label({
         label: 'Rotate Windows:',
         halign: Gtk.Align.START,
         visible: true
     });
-    prefsWidget.attach(label, 0, 7, 1, 1);
+    prefsWidget.attach(label, 0, row, 1, 1);
 
     let rotateEntry = new Gtk.Entry({
         visible: true
     });
     rotateEntry.set_text(this.settings.get_strv("rotate-windows")[0]);
-    prefsWidget.attach(rotateEntry, 1, 7, 1, 1);
+    prefsWidget.attach(rotateEntry, 1, row, 1, 1);
     rotateEntry.connect('changed', () => this.settings.set_strv("rotate-windows", [rotateEntry.get_text()]));
+    row += 1;
 
     /*** Always Float ***/
     label = new Gtk.Label({
@@ -187,14 +199,15 @@ function buildPrefsWidget() {
         halign: Gtk.Align.START,
         visible: true
     });
-    prefsWidget.attach(label, 0, 8, 1, 1);
+    prefsWidget.attach(label, 0, row, 1, 1);
 
     let alwaysFloatEntry = new Gtk.Entry({
         visible: true
     });
     alwaysFloatEntry.set_text(this.settings.get_strv("always-float")[0]);
-    prefsWidget.attach(alwaysFloatEntry, 1, 8, 1, 1);
+    prefsWidget.attach(alwaysFloatEntry, 1, row, 1, 1);
     alwaysFloatEntry.connect('changed', () => this.settings.set_strv("always-float", [alwaysFloatEntry.get_text()]));
+    row += 1;
 
     /*** Initial Split Direction ***/
     label = new Gtk.Label({
@@ -202,7 +215,7 @@ function buildPrefsWidget() {
         halign: Gtk.Align.START,
         visible: true
     });
-    prefsWidget.attach(label, 0, 9, 1, 1); 
+    prefsWidget.attach(label, 0, row, 1, 1); 
 
     let radio_horizontal = new Gtk.RadioButton({label: 'Horizontal', visible: true});
     let radio_vertical = new Gtk.RadioButton({label: 'Vertical', visible: true, group: radio_horizontal});
@@ -210,8 +223,33 @@ function buildPrefsWidget() {
     radio_horizontal.connect('toggled', () => this.settings.set_int("initial-direction", 0));
     radio_vertical.connect('toggled', () => this.settings.set_int("initial-direction", 1));
 
-    prefsWidget.attach(radio_horizontal, 1, 9, 1, 1);
-    prefsWidget.attach(radio_vertical, 2, 9, 1, 1);
+    prefsWidget.attach(radio_horizontal, 1, row, 1, 1);
+    row += 1;
+    prefsWidget.attach(radio_vertical, 1, row, 1, 1);
+    row += 1;
+
+    /*** Initial Split Direction ***/
+    label = new Gtk.Label({
+        label: 'Logging level:',
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    prefsWidget.attach(label, 0, row, 1, 1); 
+
+    let radio_logging_info = new Gtk.RadioButton({label: 'Info', visible: true});
+    let radio_logging_debug = new Gtk.RadioButton({label: 'Debug', visible: true, group: radio_logging_info});
+    let radio_logging_verbose = new Gtk.RadioButton({label: 'Verbosd', visible: true, group: radio_logging_info});
+
+    radio_logging_info.connect('toggled', () => this.settings.set_int("log-level", 0));
+    radio_logging_debug.connect('toggled', () => this.settings.set_int("log-level", 1));
+    radio_logging_verbose.connect('toggled', () => this.settings.set_int("log-level", 2));
+
+    prefsWidget.attach(radio_logging_info, 1, row, 1, 1);
+    row += 1;
+    prefsWidget.attach(radio_logging_debug, 1, row, 1, 1);
+    row += 1;
+    prefsWidget.attach(radio_logging_verbose, 1, row, 1, 1);
+    row += 1;
 
     // Return our widget which will be added to the window
     return prefsWidget;

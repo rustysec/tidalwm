@@ -33,5 +33,9 @@
             <default>0</default>
             <description>Initial direction to split (0 = horizontal, 1 = vertical)</description>
         </key>
+        <key name="log-level" type="i">
+            <default>0</default>
+            <description>Logging verbosity (0 = info, 1 = debug, 2 = verbose)</description>
+        </key>
     </schema>
 </schemalist>

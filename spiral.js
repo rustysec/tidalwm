@@ -4,8 +4,9 @@ const HORIZONTAL = 0;
 const VERTICAL = 1;
 
 var Spiral = class SpiralClass {
-    constructor(settings) {
+    constructor(settings, logging) {
         this.settings = settings;
+        this.log = logging;
         this.windows = {};
     }
 
@@ -16,7 +17,7 @@ var Spiral = class SpiralClass {
             let workspace = window.get_workspace().index();
             let monitor = window.get_monitor();
 
-            log(`spiral.js: adding window ${window.get_id()} to spiral ${workspace}, ${monitor}`);
+            this.log.log(`spiral.js: adding window ${window.get_id()} to spiral ${workspace}, ${monitor}`);
             this.windows[id] = {
                 id: window.get_id(),
                 window,
@@ -56,14 +57,14 @@ var Spiral = class SpiralClass {
     updateWindow(window) {
         if (window) {
             let id = window.get_id();
-            log(`spiral.js: updating window ${id}`);
+            this.log.log(`spiral.js: updating window ${id}`);
 
             let filtered = this.windows[id];
             if (filtered) {
                 let newWorkspace = window.get_workspace().index();
                 let newMonitor = window.get_monitor();
                 let { workspace, monitor } = filtered;
-                log(`spiral.js: moving window ${id} from spiral ${workspace}, ${monitor} to ${newWorkspace}, ${newMonitor}`);
+                this.log.debug(`spiral.js: moving window ${id} from spiral ${workspace}, ${monitor} to ${newWorkspace}, ${newMonitor}`);
 
                 filtered.monitor = newMonitor;
                 filtered.workspace = newWorkspace;
@@ -148,7 +149,7 @@ var Spiral = class SpiralClass {
 
         this.cacheWindows();
         let windows = this.getSortedWindows(workspace, monitor);
-        log(`spiral.js: executing on ${workspace}, ${monitor} with ${windows.length} windows`);
+        this.log.debug(`spiral.js: executing on ${workspace}, ${monitor} with ${windows.length} windows`);
 
         for (var i = 0; i < windows.length; i++) {
             windows[i].window.unmaximize(Meta.MaximizeFlags.BOTH);
@@ -228,7 +229,7 @@ var Spiral = class SpiralClass {
             return;
 
         let {workspace, monitor} = this.windows[window.get_id()];
-        log(`spiral.js: rotating windows on ${workspace}, ${monitor}`);
+        this.log.debug(`spiral.js: rotating windows on ${workspace}, ${monitor}`);
 
         let tmpWindows = this.getSortedWindows(workspace, monitor).reverse();
         for (var i = 0; i < tmpWindows.length; i++) {
@@ -240,11 +241,46 @@ var Spiral = class SpiralClass {
         }
         tmpWindows.forEach(window => {
             let id = window.window.get_id();
-            log(`spiral.js: rotating ${id} from ${this.windows[id].order} to ${window.order}`);
+            this.log.debug(`spiral.js: rotating ${id} from ${this.windows[id].order} to ${window.order}`);
             this.windows[id].order = window.order;
         });
 
         this.resetOrdering(workspace, monitor);
         this.execute(workspace, monitor);
+    }
+
+    dragWindow(window) {
+        if (!window || !this.windows[window.get_id()])
+            return;
+
+        let swapped = false;
+        let draggingId = window.get_id();
+        let dragging = this.windows[draggingId];
+
+        let workspace = window.get_workspace();
+        let [x, y, z] = global.get_pointer();
+
+        let rect = new Meta.Rectangle({
+            x, y,
+            width: 1,
+            height: 1,
+        });
+
+        let self = this;
+        Object.values(this.windows).forEach(item => {
+            if (item.window.get_frame_rect().contains_rect(rect)
+                && item.window.get_id() != draggingId) {
+
+                let underOrder = item.order;
+                item.order = dragging.order;
+                dragging.order = underOrder;
+
+                this.execute(workspace.index(), window.get_monitor());
+                self.swapped = true;
+            }
+        });
+
+        if (!swapped)
+            this.resetWindow(window);
     }
 }

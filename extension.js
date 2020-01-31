@@ -57,8 +57,9 @@ class Extension {
 
     enable() {
         this._settings = this.getSettings(SETTINGS_SCHEMA);
+        this.log = new Me.imports.logging.Logging(this._settings);
         if (!this._tidal) {
-            this._tidal = new Me.imports.tidal.Tidal(this._settings);
+            this._tidal = new Me.imports.tidal.Tidal(this._settings, this.log);
         }
         this.setupSignalHandling();
     }
@@ -85,13 +86,20 @@ class Extension {
             )
         );
 
+        settingsSignals.push(
+            this._settings.connect(
+                "changed::log-level", (settings) =>
+                this.logLevelChanged(settings)
+            )
+        );
+
         displaySignals.push(
             global.display.connect(
                 "window-created",
                 (display, window) => {
                     let monitor = window.get_monitor();
                     let workspace = window.get_workspace().index();
-                    //log(`extension.js: window ${window.get_id()} created on monitor ${monitor} on workspace ${workspace}`);
+                    this.log.verbose(`extension.js: window ${window.get_id()} created on monitor ${monitor} on workspace ${workspace}`);
                     this.windowCreated(window);
                 }
             )
@@ -101,12 +109,12 @@ class Extension {
             global.display.connect(
                 "window-left-monitor", (display, number, window) => {
                     if (window.get_workspace()) {
-                        //log(`extension.js: window ${window.get_id()} left monitor ${number} on workspace ${window.get_workspace().index()} (now on ${number})`);
+                        this.log.verbose(`extension.js: window ${window.get_id()} left monitor ${number} on workspace ${window.get_workspace().index()} (now on ${number})`);
                         if (window.get_window_type() == 0) {
                             this._tidal.windowLeftMonitor(window, number);
                         }
                     } else {
-                        //log(`extension.js: window ${window.get_id()} closed`);
+                        this.log.verbose(`extension.js: window ${window.get_id()} closed`);
                         if (window.get_window_type() == 0) {
                             this._tidal.closeWindow(window);
                         }
@@ -118,7 +126,7 @@ class Extension {
         displaySignals.push(
             global.display.connect(
                 "window-entered-monitor", (display, number, window) => {
-                    //log(`extension.js: window ${window.get_id()} entered monitor ${number} on workspace ${window.get_workspace().index()}`);
+                    this.log.verbose(`extension.js: window ${window.get_id()} entered monitor ${number} on workspace ${window.get_workspace().index()}`);
                     if (window.get_window_type() == 0) {
                         //this._tidal.windowEnteredMonitor(window, number);
                     }
@@ -129,18 +137,19 @@ class Extension {
         displaySignals.push(
             global.display.connect("grab-op-end", (obj, display, window, op) => {
                 if (window && window.get_window_type() == 0) { 
-                    log(`extension.js: grab op ${op} ended for ${window.get_id()} ${window.get_window_type()}`);
+                    this.log.verbose(`extension.js: grab op ${op} ended for ${window.get_id()}`);
                     if (window &&
-                        (op == 36865    // resize (nw)
-                        || op == 40961  // resize (ne)
-                        || op == 24577  // resize (se)
-                        || op == 20481  // resize (sw)
-                        || op == 16385  // resize (s)
-                        || op == 32769  // resize (n)
-                        || op == 4097   // resize (w)
-                        || op == 8193   // resize (e)
-                        || op == 1)) {  // move
+                        (op == 36865        // resize (nw)
+                        || op == 40961      // resize (ne)
+                        || op == 24577      // resize (se)
+                        || op == 20481      // resize (sw)
+                        || op == 16385      // resize (s)
+                        || op == 32769      // resize (n)
+                        || op == 4097       // resize (w)
+                        || op == 8193)) {   // resize (e)
                             this._tidal.resetWindow(window);
+                    } else if (window && op == 1 /* move */) {
+                        this._tidal.dragWindow(window);
                     }
                 }
             })
@@ -171,6 +180,13 @@ class Extension {
             })
         );
 
+        workspaceManagerSignals.push(
+            global.workspace_manager.connect("active-workspace-changed", () => {
+                /// placeholder
+                this._tidal.refreshWorkspace();
+            })
+        );
+
         this.addKeyBinding("rotate-windows", (display) => this._tidal.rotateWindows(this._tidal, display));
         this.addKeyBinding("float-window", (display) => this._tidal.floatWindow(this._tidal, display));
     }
@@ -181,15 +197,21 @@ class Extension {
         monitorSignals.forEach(signal => Meta.MonitorManager.get().disconnect(signal));
         this.removeKeyBinding("rotate-windows");
         this.removeKeyBinding("float-window");
-        log("Disabled");
+        this.log.log("TidalWM Disabled");
     }
 
     gapsChanged(data) {
-        log(`extension.js: gaps value has changed: ${data.get_int("window-gaps")}`);
+        this.log.debug(`extension.js: gaps value has changed: ${data.get_int("window-gaps")}`);
     }
 
     directionChanged(data) {
-        log(`extension.js: initial direction changed ${data.get_int("initial-direction")}`);
+        this.log.debug(`extension.js: initial direction changed ${data.get_int("initial-direction")}`);
+    }
+
+    logLevelChanged(data) {
+        this.log.log(`extension.js: log level changed to ${data.get_int("log-level")}`);
+        this.log.logLevel = data.get_int("log-level");
+        data.apply();
     }
 
     windowCreated(window) {
@@ -197,7 +219,6 @@ class Extension {
 
         let id = actor.connect('first-frame', () =>  {
             if (window.get_window_type() == 0) {
-                log(`extension.js: window ${window.get_id()} created`);
                 this._tidal.addWindow(window);
             }
             actor.disconnect(id);
