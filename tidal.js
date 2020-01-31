@@ -3,6 +3,7 @@ const GObject = imports.gi.GObject;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
+const ActiveHighlight = Me.imports.highlight.ActiveHighlight;
 const Spiral = Me.imports.spiral.Spiral;
 
 var Tidal = class TidalClass {
@@ -11,6 +12,11 @@ var Tidal = class TidalClass {
         this.settings = settings;
         this.log = logging;
         this.windows = {};
+
+        // sets up the active highlighter
+        this.activeHighlight = new ActiveHighlight();
+        global.window_group.add_child(this.activeHighlight);
+        //global.window_group.set_child_below_sibling(this.activeHighlight, null);
 
         let tilingMode = this.settings.get_int("tile-mode");
         if (tilingMode == 0) {
@@ -61,6 +67,7 @@ var Tidal = class TidalClass {
 
     // handle window focus events
     windowFocusChanged(tidal, window) {
+        tidal.log.debug(`tidal.js: window focus changed to ${window.get_id()}`);
         if (window.get_window_type() == 0) {
             let id = window.get_id();
             tidal.setWindowOpacities();
@@ -70,12 +77,24 @@ var Tidal = class TidalClass {
     // walk the window list and adjust opacities accordingly
     setWindowOpacities() {
         let opacity = (this.settings.get_int("inactive-opacity") / 100) * 255;
+        let highlight = this.settings.get_bool("highlight-active") && this.activeHighlight;
+
+        if (highlight) {
+            this.activeHighlight.hide();
+        }
 
         global.get_window_actors().forEach(actor => {
             let meta = actor.get_meta_window();
-            if (meta && meta.get_window_type() == 0) {
-                if (meta.appears_focused) {
+            if (meta /* && meta.get_window_type() == 0 */) {
+                if (meta.appears_focused || meta.is_attached_dialog()) {
                     actor.opacity = 255;
+
+                    if (highlight && meta.get_workspace().index() === global.workspace_manager.get_active_workspace_index()) {
+                        this.log.debug(`tidal.js: adding highlight to ${meta.get_id()}`);
+                        this.activeHighlight.window = meta;
+                        global.window_group.set_child_below_sibling(this.activeHighlight, actor);
+                        this.activeHighlight.show();
+                    }
                 } else {
                     actor.opacity = opacity;
                 }
@@ -87,7 +106,9 @@ var Tidal = class TidalClass {
         let id = window.get_id();
         this.log.debug(`tidal.js: closing window ${id}`);
         this.pool.removeWindow(window);
+        
         delete this.windows[id];
+        this.setWindowOpacities();
     }
 
     // removes the window from being managed by a pool
@@ -237,5 +258,7 @@ var Tidal = class TidalClass {
         for (var monitor = 0; monitor < workspace.get_display().get_n_monitors(); monitor++) {
             this.pool.execute(index, monitor);
         }
+
+        this.setWindowOpacities();
     }
 }

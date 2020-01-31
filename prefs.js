@@ -251,6 +251,25 @@ function buildPrefsWidget() {
     prefsWidget.attach(radio_logging_verbose, 1, row, 1, 1);
     row += 1;
 
+    /** Smart Gaps **/
+    label = new Gtk.Label({
+        label: 'Highlight Active Window:',
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    prefsWidget.attach(label, 0, row, 1, 1);
+    let highlightActiveSwitch = new Gtk.Switch({
+        active: this.settings.get_boolean('highlight-active'),
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    prefsWidget.attach(highlightActiveSwitch, 1, row, 1, 1);
+    highlightActiveSwitch.connect('state-set', (t) => {
+        this.settings.set_boolean("highlight-active", highlightActiveSwitch.get_active());
+        this.settings.apply();
+    });
+    row += 1;
+
     // Return our widget which will be added to the window
     return prefsWidget;
 }
