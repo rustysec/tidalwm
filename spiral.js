@@ -64,7 +64,7 @@ var Spiral = class SpiralClass {
                 let newWorkspace = window.get_workspace().index();
                 let newMonitor = window.get_monitor();
                 let { workspace, monitor } = filtered;
-                this.log.log(`spiral.js: moving window ${id} from spiral ${workspace}, ${monitor} to ${newWorkspace}, ${newMonitor}`);
+                this.log.debug(`spiral.js: moving window ${id} from spiral ${workspace}, ${monitor} to ${newWorkspace}, ${newMonitor}`);
 
                 filtered.monitor = newMonitor;
                 filtered.workspace = newWorkspace;
@@ -149,7 +149,7 @@ var Spiral = class SpiralClass {
 
         this.cacheWindows();
         let windows = this.getSortedWindows(workspace, monitor);
-        this.log.log(`spiral.js: executing on ${workspace}, ${monitor} with ${windows.length} windows`);
+        this.log.debug(`spiral.js: executing on ${workspace}, ${monitor} with ${windows.length} windows`);
 
         for (var i = 0; i < windows.length; i++) {
             windows[i].window.unmaximize(Meta.MaximizeFlags.BOTH);
@@ -229,7 +229,7 @@ var Spiral = class SpiralClass {
             return;
 
         let {workspace, monitor} = this.windows[window.get_id()];
-        this.log.log(`spiral.js: rotating windows on ${workspace}, ${monitor}`);
+        this.log.debug(`spiral.js: rotating windows on ${workspace}, ${monitor}`);
 
         let tmpWindows = this.getSortedWindows(workspace, monitor).reverse();
         for (var i = 0; i < tmpWindows.length; i++) {
@@ -241,7 +241,7 @@ var Spiral = class SpiralClass {
         }
         tmpWindows.forEach(window => {
             let id = window.window.get_id();
-            this.log.log(`spiral.js: rotating ${id} from ${this.windows[id].order} to ${window.order}`);
+            this.log.debug(`spiral.js: rotating ${id} from ${this.windows[id].order} to ${window.order}`);
             this.windows[id].order = window.order;
         });
 

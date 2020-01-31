@@ -99,7 +99,7 @@ class Extension {
                 (display, window) => {
                     let monitor = window.get_monitor();
                     let workspace = window.get_workspace().index();
-                    //this.log(`extension.js: window ${window.get_id()} created on monitor ${monitor} on workspace ${workspace}`);
+                    this.log.verbose(`extension.js: window ${window.get_id()} created on monitor ${monitor} on workspace ${workspace}`);
                     this.windowCreated(window);
                 }
             )
@@ -109,12 +109,12 @@ class Extension {
             global.display.connect(
                 "window-left-monitor", (display, number, window) => {
                     if (window.get_workspace()) {
-                        //this.log(`extension.js: window ${window.get_id()} left monitor ${number} on workspace ${window.get_workspace().index()} (now on ${number})`);
+                        this.log.verbose(`extension.js: window ${window.get_id()} left monitor ${number} on workspace ${window.get_workspace().index()} (now on ${number})`);
                         if (window.get_window_type() == 0) {
                             this._tidal.windowLeftMonitor(window, number);
                         }
                     } else {
-                        //this.log(`extension.js: window ${window.get_id()} closed`);
+                        this.log.verbose(`extension.js: window ${window.get_id()} closed`);
                         if (window.get_window_type() == 0) {
                             this._tidal.closeWindow(window);
                         }
@@ -190,15 +190,15 @@ class Extension {
         monitorSignals.forEach(signal => Meta.MonitorManager.get().disconnect(signal));
         this.removeKeyBinding("rotate-windows");
         this.removeKeyBinding("float-window");
-        this.log("Disabled");
+        this.log.log("TidalWM Disabled");
     }
 
     gapsChanged(data) {
-        this.log(`extension.js: gaps value has changed: ${data.get_int("window-gaps")}`);
+        this.log.debug(`extension.js: gaps value has changed: ${data.get_int("window-gaps")}`);
     }
 
     directionChanged(data) {
-        this.log(`extension.js: initial direction changed ${data.get_int("initial-direction")}`);
+        this.log.debug(`extension.js: initial direction changed ${data.get_int("initial-direction")}`);
     }
 
     logLevelChanged(data) {
@@ -212,7 +212,6 @@ class Extension {
 
         let id = actor.connect('first-frame', () =>  {
             if (window.get_window_type() == 0) {
-                log(`extension.js: window ${window.get_id()} created`);
                 this._tidal.addWindow(window);
             }
             actor.disconnect(id);

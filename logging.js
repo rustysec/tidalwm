@@ -6,7 +6,9 @@ var Logging = class LoggingClass {
     }
 
     verbose(msg) {
-        log(`[VERBOSE] ${msg}`);
+        if (this.logLevel >= 2) {
+            log(`[VERBOSE] ${msg}`);
+        }
     }
 
     debug(msg) {
@@ -16,7 +18,7 @@ var Logging = class LoggingClass {
     }
 
     log(msg) {
-        if (this.logLevel == 0) {
+        if (this.logLevel >= 0) {
             log(msg)
         }
     }

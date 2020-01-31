@@ -16,7 +16,7 @@ var Tidal = class TidalClass {
         if (tilingMode == 0) {
             this.poolType = Spiral;
         } else {
-            log(`tidal.js: unsupported tiling mode ${tilingMode}, using spiral`);
+            log.log.log(`tidal.js: unsupported tiling mode ${tilingMode}, using spiral`);
         }
 
         this.pool = new this.poolType(this.settings, this.log);
@@ -29,7 +29,7 @@ var Tidal = class TidalClass {
 
         // only handle normal windows for now
         if (windowType == 0) {
-            log(`tidal.js: adding window ${window.get_id()}`);
+            this.log.debug(`tidal.js: adding window ${window.get_id()}`);
 
             let id = window.get_id();
             let workspace = window.get_workspace().index();
@@ -85,7 +85,7 @@ var Tidal = class TidalClass {
 
     closeWindow(window) {
         let id = window.get_id();
-        log(`tidal.js: closing window ${id}`);
+        this.log.debug(`tidal.js: closing window ${id}`);
         this.pool.removeWindow(window);
         delete this.windows[id];
     }
@@ -122,30 +122,32 @@ var Tidal = class TidalClass {
 
     // toggles floating a window by un-tiling and setting always above
     floatWindow(self, display) {
-        let id = display.get_focus_window().get_id();
+        if (display) {
+            let id = display.get_focus_window().get_id();
 
-        let window = self.windows[id];
-        if (window && window.floating) {
-            window.floating = false;
-            window.window.unmake_above();
-            self.addWindow(window.window);
-        } else if (window && !window.floating) {
-            window.floating = true;
-            window.window.make_above();
-            self.removeWindow(window.window);
+            let window = self.windows[id];
+            if (window && window.floating) {
+                window.floating = false;
+                window.window.unmake_above();
+                self.addWindow(window.window);
+            } else if (window && !window.floating) {
+                window.floating = true;
+                window.window.make_above();
+                self.removeWindow(window.window);
+            }
         }
     }
 
     windowLeftMonitor(window, monitor) {
         if (this.windows[window.get_id()]) {
-            log(`tidal.js: window ${window.get_id()} left monitor ${monitor} -> ${window.get_monitor()}`);
+            this.log.verbose(`tidal.js: window ${window.get_id()} left monitor ${monitor} -> ${window.get_monitor()}`);
             this.pool.updateWindow(window);
         }
     }
 
     windowEnteredMonitor(window, monitor) {
         if (this.windows[window.get_id()]) {
-            log(`tidal.js: window ${window.get_id()} entered monitor ${monitor}`);
+            this.log.verbose(`tidal.js: window ${window.get_id()} entered monitor ${monitor}`);
         }
     }
 
@@ -195,7 +197,7 @@ var Tidal = class TidalClass {
             let newWorkspace = window.get_workspace().index();
             let newMonitor = window.get_monitor();
 
-            log(`tidal.js: window ${id} added to ${newWorkspace}, ${newMonitor}`);
+            this.log.debug(`tidal.js: window ${id} added to ${newWorkspace}, ${newMonitor}`);
             this.pool.updateWindow(window);
         }
     }
@@ -213,12 +215,12 @@ var Tidal = class TidalClass {
         item.workspace = window.get_workspace().index();
         item.monitor = window.get_monitor();
 
-        log(`tidal.js: window ${id} removed from ${item.workspace}, ${item.monitor}`);
+        this.log.debug(`tidal.js: window ${id} removed from ${item.workspace}, ${item.monitor}`);
     }
 
     initWorkspace(workspace) {
         if (workspace !== undefined && workspace !== null) {
-            log(`tidal.js: initializing workspace ${workspace}`);
+            this.log.debug(`tidal.js: initializing workspace ${workspace}`);
             global.workspace_manager.get_workspace_by_index(workspace).connect("window-added", (ws, w) => this.windowAdded(ws, w));
             global.workspace_manager.get_workspace_by_index(workspace).connect("window-removed", (ws, w) => this.windowRemoved(ws, w));
         } else {
