@@ -129,18 +129,19 @@ class Extension {
         displaySignals.push(
             global.display.connect("grab-op-end", (obj, display, window, op) => {
                 if (window && window.get_window_type() == 0) { 
-                    log(`extension.js: grab op ${op} ended for ${window.get_id()} ${window.get_window_type()}`);
+                    //log(`extension.js: grab op ${op} ended for ${window.get_id()}`);
                     if (window &&
-                        (op == 36865    // resize (nw)
-                        || op == 40961  // resize (ne)
-                        || op == 24577  // resize (se)
-                        || op == 20481  // resize (sw)
-                        || op == 16385  // resize (s)
-                        || op == 32769  // resize (n)
-                        || op == 4097   // resize (w)
-                        || op == 8193   // resize (e)
-                        || op == 1)) {  // move
+                        (op == 36865        // resize (nw)
+                        || op == 40961      // resize (ne)
+                        || op == 24577      // resize (se)
+                        || op == 20481      // resize (sw)
+                        || op == 16385      // resize (s)
+                        || op == 32769      // resize (n)
+                        || op == 4097       // resize (w)
+                        || op == 8193)) {   // resize (e)
                             this._tidal.resetWindow(window);
+                    } else if (window && op == 1 /* move */) {
+                        this._tidal.dragWindow(window);
                     }
                 }
             })

@@ -247,4 +247,39 @@ var Spiral = class SpiralClass {
         this.resetOrdering(workspace, monitor);
         this.execute(workspace, monitor);
     }
+
+    dragWindow(window) {
+        if (!window || !this.windows[window.get_id()])
+            return;
+
+        let swapped = false;
+        let draggingId = window.get_id();
+        let dragging = this.windows[draggingId];
+
+        let workspace = window.get_workspace();
+        let [x, y, z] = global.get_pointer();
+
+        let rect = new Meta.Rectangle({
+            x, y,
+            width: 1,
+            height: 1,
+        });
+
+        let self = this;
+        Object.values(this.windows).forEach(item => {
+            if (item.window.get_frame_rect().contains_rect(rect)
+                && item.window.get_id() != draggingId) {
+
+                let underOrder = item.order;
+                item.order = dragging.order;
+                dragging.order = underOrder;
+
+                this.execute(workspace.index(), window.get_monitor());
+                self.swapped = true;
+            }
+        });
+
+        if (!swapped)
+            this.resetWindow(window);
+    }
 }

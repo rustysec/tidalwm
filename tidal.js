@@ -111,6 +111,14 @@ var Tidal = class TidalClass {
         }
     }
 
+    dragWindow(window) {
+        if (this.pool.dragWindow) {
+            this.pool.dragWindow(window);
+        } else {
+            this.resetWindow(window);
+        }
+    }
+
     // toggles floating a window by un-tiling and setting always above
     floatWindow(self, display) {
         let id = display.get_focus_window().get_id();
