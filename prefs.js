@@ -7,13 +7,9 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 
 
-function init() {
-}
+function init() {}
 
 function buildPrefsWidget() {
-
-    let row = 0;
-
     // Copy the same GSettings code from `extension.js`
     let gschema = Gio.SettingsSchemaSource.new_from_directory(
         Me.dir.get_child('schemas').get_path(),
@@ -26,43 +22,83 @@ function buildPrefsWidget() {
     });
 
     // Create a parent widget that we'll return from this function
-    let prefsWidget = new Gtk.Grid({
+    let widget = new Gtk.Grid({
         margin: 18,
         column_spacing: 12,
         row_spacing: 12,
         visible: true
     });
 
-    // Add a simple title and add it to the prefsWidget
+    // Add a simple title and add it to the widget
     let title = new Gtk.Label({
-        // As described in "Extension Translations", the following template
-        // lit
-        // prefs.js:88: warning: RegExp literal terminated too early
-        //label: `<b>${Me.metadata.name} Extension Preferences</b>`,
         label: '<b>' + Me.metadata.name + ' Extension Preferences</b>',
         halign: Gtk.Align.START,
         use_markup: true,
         visible: true
     });
-    prefsWidget.attach(title, 0, row, 2, 1);
-    row += 1;
+    widget.attach(title, 0, 0, 2, 1);
 
-    /*** Reset ***/
-    let buttonLabel = new Gtk.Label({
-        label: 'Reset To Defaults:',
+    let notebook = new Gtk.Notebook({
+        halign: Gtk.Align.FILL,
+        visible: true,
+        scrollable: true,
+    });
+    widget.attach(notebook, 0, 1, 10, 10);
+
+    let label = new Gtk.Label({
+        label: 'Gaps',
         halign: Gtk.Align.START,
+        use_markup: false,
         visible: true
     });
-    prefsWidget.attach(buttonLabel, 0, row, 1, 1);
 
-    let button = new Gtk.Button({
-        label: 'Reset',
+    notebook.append_page(gapsWidget(), label);
+
+    label = new Gtk.Label({
+        label: 'Windows',
+        halign: Gtk.Align.START,
+        use_markup: false,
         visible: true
     });
-    prefsWidget.attach(button, 1, row, 1, 1);
+    notebook.append_page(windowWidget(), label);
 
-    button.connect('clicked', (button) => this.settings.reset('window-gaps'));
-    row += 1;
+    label = new Gtk.Label({
+        label: 'Tiling',
+        halign: Gtk.Align.START,
+        use_markup: false,
+        visible: true
+    });
+    notebook.append_page(tilingWidget(), label);
+
+    label = new Gtk.Label({
+        label: 'Hotkeys',
+        halign: Gtk.Align.START,
+        use_markup: false,
+        visible: true
+    });
+    notebook.append_page(hotkeysWidget(), label);
+
+    label = new Gtk.Label({
+        label: 'Misc',
+        halign: Gtk.Align.START,
+        use_markup: false,
+        visible: true
+    });
+    notebook.append_page(miscWidget(), label);
+
+    return widget;
+}
+
+function gapsWidget() {
+    // Create a parent widget that we'll return from this function
+    let widget = new Gtk.Grid({
+        margin: 18,
+        column_spacing: 12,
+        row_spacing: 12,
+        visible: true
+    });
+
+    let row = 0;
 
     /*** Gaps Settings ***/
     let toggleLabel = new Gtk.Label({
@@ -70,7 +106,7 @@ function buildPrefsWidget() {
         halign: Gtk.Align.START,
         visible: true
     });
-    prefsWidget.attach(toggleLabel, 0, row, 1, 1);
+    widget.attach(toggleLabel, 0, row, 1, 1);
 
     let gaps_adjustment = new Gtk.Adjustment({
         lower: 0,
@@ -88,7 +124,7 @@ function buildPrefsWidget() {
         input_purpose: "number",
         adjustment: gaps_adjustment,
     });
-    prefsWidget.attach(gaps, 1, row, 1, 1);
+    widget.attach(gaps, 1, row, 1, 1);
     gaps.connect('value-changed', () => this.settings.set_int("window-gaps", gaps.get_value()));
     row += 1;
 
@@ -98,49 +134,39 @@ function buildPrefsWidget() {
         halign: Gtk.Align.START,
         visible: true
     });
-    prefsWidget.attach(label, 0, row, 1, 1);
+    widget.attach(label, 0, row, 1, 1);
     let smartGapsSwitch = new Gtk.Switch({
         active: this.settings.get_boolean('smart-gaps'),
         halign: Gtk.Align.START,
         visible: true
     });
-    prefsWidget.attach(smartGapsSwitch, 1, row, 1, 1);
+    widget.attach(smartGapsSwitch, 1, row, 1, 1);
     smartGapsSwitch.connect('state-set', (t) => {
         this.settings.set_boolean("smart-gaps", smartGapsSwitch.get_active());
         this.settings.apply();
     });
-    row += 1;
 
-    /*** Tiling Mode ***/
-    let tileModeLabel = new Gtk.Label({
-        label: 'Tiling Mode:',
-        halign: Gtk.Align.START,
+    return widget;
+}
+
+function windowWidget() {
+    // Create a parent widget that we'll return from this function
+    let widget = new Gtk.Grid({
+        margin: 18,
+        column_spacing: 12,
+        row_spacing: 12,
         visible: true
     });
-    prefsWidget.attach(tileModeLabel, 0, row, 1, 1); 
 
-    let radio_spiral = new Gtk.RadioButton({label: 'Spiral', visible: true});
-    let radio_binary = new Gtk.RadioButton({label: 'Binary', visible: true, group: radio_spiral});
-    let radio_i3 = new Gtk.RadioButton({label: 'i3/Sway', visible: true, group: radio_spiral});
-
-    // awaiting implementation
-    radio_binary.set_sensitive(false);
-    radio_i3.set_sensitive(false);
-
-    prefsWidget.attach(radio_spiral, 1, row, 1, 1);
-    row += 1;
-    prefsWidget.attach(radio_binary, 1, row, 1, 1);
-    row += 1;
-    prefsWidget.attach(radio_i3, 1, row, 1, 1);
-    row += 1;
+    let row = 0;
 
     /*** Inactive Opacity ***/
-    let inactiveOpacity = new Gtk.Label({
+    let label = new Gtk.Label({
         label: 'Inactive Window Opacity:',
         halign: Gtk.Align.START,
         visible: true
     });
-    prefsWidget.attach(inactiveOpacity, 0, row, 1, 1);
+    widget.attach(label, 0, row, 1, 1);
 
     let inactive_opacity_adjustment = new Gtk.Adjustment({
         lower: 5,
@@ -158,55 +184,201 @@ function buildPrefsWidget() {
         input_purpose: "number",
         adjustment: inactive_opacity_adjustment,
     });
-    prefsWidget.attach(opacity, 1, row, 1, 1);
+    widget.attach(opacity, 1, row, 1, 1);
     opacity.connect('value-changed', () => this.settings.set_int("inactive-opacity", opacity.get_value()));
     row += 1;
 
-    /*** Hotkeys ***/
+    /** Highlight Active **/
     label = new Gtk.Label({
-        label: 'Float Window:',
+        label: 'Highlight Active Window:',
         halign: Gtk.Align.START,
         visible: true
     });
-    prefsWidget.attach(label, 0, row, 1, 1);
-
-    let floatEntry = new Gtk.Entry({
-        visible: true
-    });
-    floatEntry.set_text(this.settings.get_strv("float-window")[0]);
-    prefsWidget.attach(floatEntry, 1, row, 1, 1);
-    floatEntry.connect('changed', () => this.settings.set_strv("float-window", [floatEntry.get_text()]));
-    row += 1;
-
-    label = new Gtk.Label({
-        label: 'Rotate Windows:',
+    widget.attach(label, 0, row, 1, 1);
+    let highlightActiveSwitch = new Gtk.Switch({
+        active: this.settings.get_boolean('highlight-active'),
         halign: Gtk.Align.START,
         visible: true
     });
-    prefsWidget.attach(label, 0, row, 1, 1);
-
-    let rotateEntry = new Gtk.Entry({
-        visible: true
+    widget.attach(highlightActiveSwitch, 1, row, 1, 1);
+    highlightActiveSwitch.connect('state-set', (t) => {
+        this.settings.set_boolean("highlight-active", highlightActiveSwitch.get_active());
+        this.settings.apply();
     });
-    rotateEntry.set_text(this.settings.get_strv("rotate-windows")[0]);
-    prefsWidget.attach(rotateEntry, 1, row, 1, 1);
-    rotateEntry.connect('changed', () => this.settings.set_strv("rotate-windows", [rotateEntry.get_text()]));
     row += 1;
 
-    /*** Always Float ***/
+    /** Highlight Top **/
+    label = new Gtk.Label({
+        label: 'Active Border Top:',
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    widget.attach(label, 0, row, 1, 1);
+    let highlightActiveBorderTopSwitch = new Gtk.Switch({
+        active: this.settings.get_boolean('highlight-active-border-top'),
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    widget.attach(highlightActiveBorderTopSwitch, 1, row, 1, 1);
+    highlightActiveBorderTopSwitch.connect('state-set', (t) => {
+        this.settings.set_boolean("highlight-active-border-top", highlightActiveBorderTopSwitch.get_active());
+        this.settings.apply();
+    });
+    row += 1;
+
+    /** Highlight Right **/
+    label = new Gtk.Label({
+        label: 'Active Border Right:',
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    widget.attach(label, 0, row, 1, 1);
+    let highlightActiveBorderRightSwitch = new Gtk.Switch({
+        active: this.settings.get_boolean('highlight-active-border-right'),
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    widget.attach(highlightActiveBorderRightSwitch, 1, row, 1, 1);
+    highlightActiveBorderRightSwitch.connect('state-set', (t) => {
+        this.settings.set_boolean("highlight-active-border-right", highlightActiveBorderRightSwitch.get_active());
+        this.settings.apply();
+    });
+    row += 1;
+
+    /** Highlight Bottom **/
+    label = new Gtk.Label({
+        label: 'Active Border Bottom:',
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    widget.attach(label, 0, row, 1, 1);
+    let highlightActiveBorderBottomSwitch = new Gtk.Switch({
+        active: this.settings.get_boolean('highlight-active-border-bottom'),
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    widget.attach(highlightActiveBorderBottomSwitch, 1, row, 1, 1);
+    highlightActiveBorderBottomSwitch.connect('state-set', (t) => {
+        this.settings.set_boolean("highlight-active-border-bottom", highlightActiveBorderBottomSwitch.get_active());
+        this.settings.apply();
+    });
+    row += 1;
+
+    /** Highlight Left **/
+    label = new Gtk.Label({
+        label: 'Active Border Left:',
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    widget.attach(label, 0, row, 1, 1);
+    let highlightActiveBorderLeftSwitch = new Gtk.Switch({
+        active: this.settings.get_boolean('highlight-active-border-left'),
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    widget.attach(highlightActiveBorderLeftSwitch, 1, row, 1, 1);
+    highlightActiveBorderLeftSwitch.connect('state-set', (t) => {
+        this.settings.set_boolean("highlight-active-border-left", highlightActiveBorderLeftSwitch.get_active());
+        this.settings.apply();
+    });
+    row += 1;
+
+    /*** Border Width ***/
+    label = new Gtk.Label({
+        label: 'Border width:',
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    widget.attach(label, 0, row, 1, 1);
+
+    let border_adjustment = new Gtk.Adjustment({
+        lower: 0,
+        upper: 20,
+        step_increment: 1,
+        value: this.settings.get_int("highlight-active-border-width"),
+    });
+
+    let border = new Gtk.SpinButton({
+        value: this.settings.get_int("highlight-active-border-width"),
+        numeric: true,
+        snap_to_ticks: true,
+        wrap: true,
+        visible: true,
+        input_purpose: "number",
+        adjustment: border_adjustment,
+    });
+    widget.attach(border, 1, row, 1, 1);
+    border.connect('value-changed', () => this.settings.set_int("highlight-active-border-width", border.get_value()));
+    row += 1;
+
+    /*** Highlight Color ***/
+    label = new Gtk.Label({
+        label: 'Border Color:',
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    widget.attach(label, 0, row, 1, 1);
+
+    let borderColorEntry = new Gtk.Entry({
+        visible: true
+    });
+    borderColorEntry.set_sensitive(this.settings.get_boolean("highlight-active"));
+    borderColorEntry.set_text(this.settings.get_string("highlight-active-border-color"));
+    widget.attach(borderColorEntry, 1, row, 1, 1);
+    borderColorEntry.connect('changed', () => this.settings.set_strv("highlight-active-border-color", borderColorEntry.get_text()));
+    row += 1;
+
+    /*** Always Float List ***/
     label = new Gtk.Label({
         label: 'Always Float:',
         halign: Gtk.Align.START,
         visible: true
     });
-    prefsWidget.attach(label, 0, row, 1, 1);
+    widget.attach(label, 0, row, 1, 1);
 
     let alwaysFloatEntry = new Gtk.Entry({
         visible: true
     });
     alwaysFloatEntry.set_text(this.settings.get_strv("always-float")[0]);
-    prefsWidget.attach(alwaysFloatEntry, 1, row, 1, 1);
+    widget.attach(alwaysFloatEntry, 1, row, 1, 1);
     alwaysFloatEntry.connect('changed', () => this.settings.set_strv("always-float", [alwaysFloatEntry.get_text()]));
+    row += 1;
+
+    return widget;
+}
+
+function tilingWidget() {
+    // Create a parent widget that we'll return from this function
+    let widget = new Gtk.Grid({
+        margin: 18,
+        column_spacing: 12,
+        row_spacing: 12,
+        visible: true
+    });
+
+    let row = 0;
+
+    /*** Tiling Mode ***/
+    let label = new Gtk.Label({
+        label: 'Tiling Mode:',
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    widget.attach(label, 0, row, 1, 1); 
+
+    let radio_spiral = new Gtk.RadioButton({label: 'Spiral', visible: true});
+    let radio_binary = new Gtk.RadioButton({label: 'Binary', visible: true, group: radio_spiral});
+    let radio_i3 = new Gtk.RadioButton({label: 'i3/Sway', visible: true, group: radio_spiral});
+
+    // awaiting implementation
+    radio_binary.set_sensitive(false);
+    radio_i3.set_sensitive(false);
+
+    widget.attach(radio_spiral, 1, row, 1, 1);
+    row += 1;
+    widget.attach(radio_binary, 1, row, 1, 1);
+    row += 1;
+    widget.attach(radio_i3, 1, row, 1, 1);
     row += 1;
 
     /*** Initial Split Direction ***/
@@ -215,7 +387,7 @@ function buildPrefsWidget() {
         halign: Gtk.Align.START,
         visible: true
     });
-    prefsWidget.attach(label, 0, row, 1, 1); 
+    widget.attach(label, 0, row, 1, 1); 
 
     let radio_horizontal = new Gtk.RadioButton({label: 'Horizontal', visible: true});
     let radio_vertical = new Gtk.RadioButton({label: 'Vertical', visible: true, group: radio_horizontal});
@@ -223,18 +395,84 @@ function buildPrefsWidget() {
     radio_horizontal.connect('toggled', () => this.settings.set_int("initial-direction", 0));
     radio_vertical.connect('toggled', () => this.settings.set_int("initial-direction", 1));
 
-    prefsWidget.attach(radio_horizontal, 1, row, 1, 1);
+    widget.attach(radio_horizontal, 1, row, 1, 1);
     row += 1;
-    prefsWidget.attach(radio_vertical, 1, row, 1, 1);
+    widget.attach(radio_vertical, 1, row, 1, 1);
     row += 1;
 
-    /*** Logging Levels ***/
+    return widget;
+}
+
+function hotkeysWidget() {
+    // Create a parent widget that we'll return from this function
+    let widget = new Gtk.Grid({
+        margin: 18,
+        column_spacing: 12,
+        row_spacing: 12,
+        visible: true
+    });
+
+    let row = 0;
+
+    /*** Hotkeys ***/
+    let label = new Gtk.Label({
+        label: 'Float Window:',
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    widget.attach(label, 0, row, 1, 1);
+
+    let floatEntry = new Gtk.Entry({
+        visible: true
+    });
+    floatEntry.set_text(this.settings.get_strv("float-window")[0]);
+    widget.attach(floatEntry, 1, row, 1, 1);
+    floatEntry.connect('changed', () => {
+        this.settings.set_strv("float-window", [floatEntry.get_text()]);
+        this.settings.apply();
+    });
+    row += 1;
+
     label = new Gtk.Label({
+        label: 'Rotate Windows:',
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    widget.attach(label, 0, row, 1, 1);
+
+    let rotateEntry = new Gtk.Entry({
+        visible: true
+    });
+    rotateEntry.set_text(this.settings.get_strv("rotate-windows")[0]);
+    widget.attach(rotateEntry, 1, row, 1, 1);
+    rotateEntry.connect('changed', () => {
+        this.settings.set_strv("rotate-windows", [rotateEntry.get_text()])
+        this.settings.apply();
+    });
+    row += 1;
+
+    // Return our widget which will be added to the window
+    return widget;
+}
+
+function miscWidget() {
+    // Create a parent widget that we'll return from this function
+    let widget = new Gtk.Grid({
+        margin: 18,
+        column_spacing: 12,
+        row_spacing: 12,
+        visible: true
+    });
+
+    let row = 0;
+
+    /*** Logging Levels ***/
+    let label = new Gtk.Label({
         label: 'Logging level:',
         halign: Gtk.Align.START,
         visible: true
     });
-    prefsWidget.attach(label, 0, row, 1, 1); 
+    widget.attach(label, 0, row, 1, 1); 
 
     let radio_logging_info = new Gtk.RadioButton({label: 'Info', visible: true});
     let radio_logging_debug = new Gtk.RadioButton({label: 'Debug', visible: true, group: radio_logging_info});
@@ -244,32 +482,12 @@ function buildPrefsWidget() {
     radio_logging_debug.connect('toggled', () => this.settings.set_int("log-level", 1));
     radio_logging_verbose.connect('toggled', () => this.settings.set_int("log-level", 2));
 
-    prefsWidget.attach(radio_logging_info, 1, row, 1, 1);
+    widget.attach(radio_logging_info, 1, row, 1, 1);
     row += 1;
-    prefsWidget.attach(radio_logging_debug, 1, row, 1, 1);
+    widget.attach(radio_logging_debug, 1, row, 1, 1);
     row += 1;
-    prefsWidget.attach(radio_logging_verbose, 1, row, 1, 1);
-    row += 1;
-
-    /** Highlight Active **/
-    label = new Gtk.Label({
-        label: 'Highlight Active Window:',
-        halign: Gtk.Align.START,
-        visible: true
-    });
-    prefsWidget.attach(label, 0, row, 1, 1);
-    let highlightActiveSwitch = new Gtk.Switch({
-        active: this.settings.get_boolean('highlight-active'),
-        halign: Gtk.Align.START,
-        visible: true
-    });
-    prefsWidget.attach(highlightActiveSwitch, 1, row, 1, 1);
-    highlightActiveSwitch.connect('state-set', (t) => {
-        this.settings.set_boolean("highlight-active", highlightActiveSwitch.get_active());
-        this.settings.apply();
-    });
+    widget.attach(radio_logging_verbose, 1, row, 1, 1);
     row += 1;
 
-    // Return our widget which will be added to the window
-    return prefsWidget;
+    return widget;
 }

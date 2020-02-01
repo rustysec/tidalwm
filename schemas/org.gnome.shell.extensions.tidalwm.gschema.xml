@@ -41,5 +41,29 @@
             <default>true</default>
             <description>Draw a border around the active window</description>
         </key>
+        <key name="highlight-active-border-top" type="b">
+            <default>true</default>
+            <description>Draw top border around the active window</description>
+        </key>
+        <key name="highlight-active-border-right" type="b">
+            <default>true</default>
+            <description>Draw top border around the active window</description>
+        </key>
+        <key name="highlight-active-border-bottom" type="b">
+            <default>true</default>
+            <description>Draw top border around the active window</description>
+        </key>
+        <key name="highlight-active-border-left" type="b">
+            <default>true</default>
+            <description>Draw top border around the active window</description>
+        </key>
+        <key name="highlight-active-border-color" type="s">
+            <default>"#2d9f2d"</default>
+            <description>Color to use for active border</description>
+        </key>
+        <key name="highlight-active-border-width" type="i">
+            <default>5</default>
+            <description>Width of active border (pixels)</description>
+        </key>
     </schema>
 </schemalist>
