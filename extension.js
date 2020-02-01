@@ -68,28 +68,70 @@ class Extension {
         settingsSignals.push(
             this._settings.connect(
                 "changed::window-gaps",
-                this.gapsChanged
+                (settings) => this.gapsChanged(settings)
             )
         );
 
         settingsSignals.push(
             this._settings.connect(
                 "changed::smart-gaps",
-                this.gapsChanged
+                (settings) => this.gapsChanged(settings)
             )
         );
 
         settingsSignals.push(
             this._settings.connect(
                 "changed::initial-direction",
-                this.directionChanged
+                (settings) => this.directionChanged(settings)
             )
         );
 
         settingsSignals.push(
             this._settings.connect(
-                "changed::log-level", (settings) =>
-                this.logLevelChanged(settings)
+                "changed::log-level",
+                (settings) => this.logLevelChanged(settings)
+            )
+        );
+
+        settingsSignals.push(
+            this._settings.connect(
+                "changed::highlight-active-border-color",
+                (settings) => this._tidal.updateWindowBorders({ color: settings.get_string("highlight-active-border-color") })
+            )
+        );
+
+        settingsSignals.push(
+            this._settings.connect(
+                "changed::highlight-active-border-width",
+                (settings) => this._tidal.updateWindowBorders({ width: settings.get_int("highlight-active-border-width") })
+            )
+        );
+
+        settingsSignals.push(
+            this._settings.connect(
+                "changed::highlight-active-border-top",
+                (settings) => this._tidal.updateWindowBorders({ top: settings.get_boolean("highlight-active-border-top") })
+            )
+        );
+
+        settingsSignals.push(
+            this._settings.connect(
+                "changed::highlight-active-border-right",
+                (settings) => this._tidal.updateWindowBorders({ right: settings.get_boolean("highlight-active-border-right") })
+            )
+        );
+
+        settingsSignals.push(
+            this._settings.connect(
+                "changed::highlight-active-border-bottom",
+                (settings) => this._tidal.updateWindowBorders({ bottom: settings.get_boolean("highlight-active-border-bottom") })
+            )
+        );
+
+        settingsSignals.push(
+            this._settings.connect(
+                "changed::highlight-active-border-left",
+                (settings) => this._tidal.updateWindowBorders({ left: settings.get_boolean("highlight-active-border-left") })
             )
         );
 

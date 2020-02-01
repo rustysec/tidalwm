@@ -52,6 +52,42 @@ Ex: `[Ctrl-Alt-o]`
 * Customizable initial split direction (horizontal vs vertical)
 * **Dynamic workspaces** are now supported!
 
+## Configuration
+TidalWM is not as fully featured as something like i3, sway, or bspwm, but there are some quality
+of life settings to make it more pleasant to use.
+
+#### Gaps
+|Setting|Description|
+|-------|-----------|
+|`Window Gaps`| The space between windows and the edge of the screen (pixels)|
+|`Smart Gaps`| Only apply gaps when more than one window is on the monitor|
+
+#### Windows
+|Setting|Description|
+|-------|-----------|
+|`Inactive Window Opacity`| Sets opacity of any non-focused window, percentage 0-100|
+|`Highlight Active Window`| Draw a colored border around the focused window|
+|`Active Border Top`|Draw the border along the top of the window|
+|`Active Border Right`|Draw the border along the right side of the window|
+|`Active Border Bottom`|Draw the border along the bottom of the window|
+|`Active Border Left`|Draw the border along the left of the window|
+|`Border Width`|Width of the border to draw around window|
+|`Border Color`|Can be any valid CSS color, ex: `#00ff00`, `rgba(100, 100, 100, 0.5)`|
+
+#### Tiling
+|Setting|Description|
+|-------|-----------|
+|`Spiral`| Use spiral tiling|
+|`Binary`| Use binary tiling (_not implemented_)|
+|`i3/sway`| Use i3/sway tiling (_not implemented_)|
+|`Initial Split Direction`| Which way to perform the first split|
+
+#### Hotkeys 
+|Setting|Description|
+|-------|-----------|
+|`Float Window`|Floats the focused window, ex: `<Ctrl><Alt>f`|
+|`Rotate Windows`|Automatically rotate windows through the tiling order, ex: `<Ctrl><Alt>r`|
+
 ## FAQ
 ### Why is this a thing?
 This question can probably be broken down into two subquestions:
