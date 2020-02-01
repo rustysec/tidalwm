@@ -325,7 +325,7 @@ function windowWidget() {
     borderColorEntry.set_sensitive(this.settings.get_boolean("highlight-active"));
     borderColorEntry.set_text(this.settings.get_string("highlight-active-border-color"));
     widget.attach(borderColorEntry, 1, row, 1, 1);
-    borderColorEntry.connect('changed', () => this.settings.set_strv("highlight-active-border-color", borderColorEntry.get_text()));
+    borderColorEntry.connect('changed', () => this.settings.set_string("highlight-active-border-color", borderColorEntry.get_text()));
     row += 1;
 
     /*** Always Float List ***/

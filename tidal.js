@@ -1,5 +1,6 @@
 const Clutter = imports.gi.Clutter;
 const GObject = imports.gi.GObject;
+const Main    = imports.ui.main;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
@@ -14,9 +15,7 @@ var Tidal = class TidalClass {
         this.windows = {};
 
         // sets up the active highlighter
-        this.activeHighlight = new ActiveHighlight();
-        global.window_group.add_child(this.activeHighlight);
-        //global.window_group.set_child_below_sibling(this.activeHighlight, null);
+        this.activeHighlight = new ActiveHighlight(settings);
 
         let tilingMode = this.settings.get_int("tile-mode");
         if (tilingMode == 0) {
@@ -85,15 +84,21 @@ var Tidal = class TidalClass {
 
         global.get_window_actors().forEach(actor => {
             let meta = actor.get_meta_window();
-            if (meta /* && meta.get_window_type() == 0 */) {
+            if (meta && meta.get_window_type() == 0) {
                 if (meta.appears_focused || meta.is_attached_dialog()) {
+                    this.log.debug(`tidal.js: window ${meta.get_id()} focused`);
                     actor.opacity = 255;
 
                     if (highlight && meta.get_workspace().index() === global.workspace_manager.get_active_workspace_index()) {
                         this.log.debug(`tidal.js: adding highlight to ${meta.get_id()}`);
+                        let scale = meta.get_workspace()
+                                .get_display()
+                                .get_monitor_scale(meta.get_monitor());
+
                         this.activeHighlight.window = meta;
-                        global.window_group.set_child_below_sibling(this.activeHighlight, actor);
                         this.activeHighlight.show();
+                        this.activeHighlight.refresh();
+                        Main.activateWindow(meta);
                     }
                 } else {
                     actor.opacity = opacity;
@@ -129,6 +134,7 @@ var Tidal = class TidalClass {
             let id = window.get_id();
             if (this.windows[id] && !this.windows[id].floating) {
                 this.pool.resetWindow(window);
+                this.activeHighlight = window;
             }
         }
     }
@@ -260,5 +266,22 @@ var Tidal = class TidalClass {
         }
 
         this.setWindowOpacities();
+    }
+
+    updateWindowBorders(conf) {
+        if (conf) {
+            if (conf.color)
+                this.activeHighlight.color = conf.color;
+            if (conf.width !== undefined)
+                this.activeHighlight.width = conf.width;
+            if (conf.top !== undefined)
+                this.activeHighlight.top = conf.top;
+            if (conf.right !== undefined)
+                this.activeHighlight.right = conf.right;
+            if (conf.bottom !== undefined)
+                this.activeHighlight.bottom = conf.bottom;
+            if (conf.left !== undefined)
+                this.activeHighlight.left = conf.left;
+        }
     }
 }
