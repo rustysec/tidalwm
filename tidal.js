@@ -78,7 +78,7 @@ var Tidal = class TidalClass {
         let opacity = (this.settings.get_int("inactive-opacity") / 100) * 255;
         let highlight = this.settings.get_boolean("highlight-active") && this.activeHighlight;
 
-        if (highlight) {
+        if (highlight && this.activeHighlight.hide) {
             this.activeHighlight.hide();
         }
 
@@ -315,5 +315,37 @@ var Tidal = class TidalClass {
         if (this.pool.decreaseVerticalSplit) {
             this.pool.decreaseVerticalSplit(this.getActiveWindow());
         }
+    }
+
+    selectWindow(direction) {
+        let active = this.getActiveWindow();
+        if (!active)
+            return;
+
+        let rect = active.get_frame_rect();
+        let gaps = this.settings.get_int("window-gaps");
+        let scale = active.get_display().get_monitor_scale(active.get_monitor()) * 2;
+
+        let offset = (gaps * scale) + (scale * 2);
+
+        if (direction.above) {
+            rect.y -= offset;
+        } else if (direction.below) {
+            rect.y += offset;
+        } else if (direction.left) {
+            rect.x -= offset;
+        } else if (direction.right) {
+            rect.x += offset;
+        }
+
+        active.get_workspace().list_windows().forEach(window => {
+            if (window !== active) {
+                let other = window.get_frame_rect();
+                if (rect.overlap(other)) {
+                    this.log.debug(`${active.get_id()} has a neighbor ${window.get_id()}`);
+                    window.focus(0);
+                }
+            }
+        });
     }
 }
