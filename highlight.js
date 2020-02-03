@@ -92,26 +92,30 @@ class ActiveHighlight {
     refresh() {
         if (this._window) {
             let rect = this._window.get_frame_rect();
+            let borderWidth = this._borderWidth *
+                this._window
+                    .get_display()
+                    .get_monitor_scale(this._window.get_monitor());
 
             if (this._borderTop) {
                 let width = rect.width +
-                    (this._borderRight ? this._borderWidth : 0) +
-                    (this._borderLeft ? this._borderWidth : 0);
-                this._highlightTop.set_size(width, this._borderWidth);
+                    (this._borderRight ? borderWidth : 0) +
+                    (this._borderLeft ? borderWidth : 0);
+                this._highlightTop.set_size(width, borderWidth);
                 this._highlightTop.set_position(
-                    rect.x - (this._borderLeft ? this._borderWidth : 0),
-                    rect.y - this._borderWidth
+                    rect.x - (this._borderLeft ? borderWidth : 0),
+                    rect.y - borderWidth
                 );
                 this._highlightTop.show();
             }
 
             if (this._borderBottom) {
                 let width = rect.width +
-                    (this._borderRight ? this._borderWidth : 0) +
-                    (this._borderLeft ? this._borderWidth : 0);
-                this._highlightBottom.set_size(width, this._borderWidth);
+                    (this._borderRight ? borderWidth : 0) +
+                    (this._borderLeft ? borderWidth : 0);
+                this._highlightBottom.set_size(width, borderWidth);
                 this._highlightBottom.set_position(
-                    rect.x - (this._borderLeft ? this._borderWidth : 0),
+                    rect.x - (this._borderLeft ? borderWidth : 0),
                     rect.y + rect.height
                 );
                 this._highlightBottom.show();
@@ -119,7 +123,7 @@ class ActiveHighlight {
 
             if (this._borderRight) {
                 let height = rect.height;
-                this._highlightRight.set_size(this._borderWidth, height);
+                this._highlightRight.set_size(borderWidth, height);
                 this._highlightRight.set_position(
                     rect.x + rect.width,
                     rect.y
@@ -128,9 +132,9 @@ class ActiveHighlight {
 
             if (this._borderLeft) {
                 let height = rect.height;
-                this._highlightLeft.set_size(this._borderWidth, height);
+                this._highlightLeft.set_size(borderWidth, height);
                 this._highlightLeft.set_position(
-                    rect.x - this._borderWidth,
+                    rect.x - borderWidth,
                     rect.y
                 );
             }
