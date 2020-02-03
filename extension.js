@@ -231,6 +231,10 @@ class Extension {
 
         this.addKeyBinding("rotate-windows", (display) => this._tidal.rotateWindows(this._tidal, display));
         this.addKeyBinding("float-window", (display) => this._tidal.floatWindow(this._tidal, display));
+        this.addKeyBinding("increase-hsplit", (display) => this._tidal.increaseHorizontalSplit(display));
+        this.addKeyBinding("decrease-hsplit", (display) => this._tidal.decreaseHorizontalSplit(display));
+        this.addKeyBinding("increase-vsplit", (display) => this._tidal.increaseVerticalSplit(display));
+        this.addKeyBinding("decrease-vsplit", (display) => this._tidal.decreaseVerticalSplit(display));
     }
 
     disable() {

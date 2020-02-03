@@ -65,5 +65,21 @@
             <default>5</default>
             <description>Width of active border (pixels)</description>
         </key>
+        <key name="increase-hsplit" type="as">
+            <default><![CDATA[['<Super>Right']]]></default>
+            <description>Increases the horizontal split value of the focused window</description>
+        </key>
+        <key name="decrease-hsplit" type="as">
+            <default><![CDATA[['<Super>Left']]]></default>
+            <description>Decreases the horizontal split value of the focused window</description>
+        </key>
+        <key name="increase-vsplit" type="as">
+            <default><![CDATA[['<Super>Up']]]></default>
+            <description>Increases the vertical split value of the focused window</description>
+        </key>
+        <key name="decrease-vsplit" type="as">
+            <default><![CDATA[['<Super>Down']]]></default>
+            <description>Decreases the vertical split value of the focused window</description>
+        </key>
     </schema>
 </schemalist>

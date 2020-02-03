@@ -107,6 +107,14 @@ var Tidal = class TidalClass {
         });
     }
 
+    // walk the window list and adjust opacities accordingly
+    getActiveWindow() {
+        return global.get_window_actors().filter(actor => {
+            let meta = actor.get_meta_window();
+            return meta && meta.get_window_type() == 0 && meta.appears_focused;
+        }).map(actor => actor.get_meta_window())[0];
+    }
+
     closeWindow(window) {
         let id = window.get_id();
         this.log.debug(`tidal.js: closing window ${id}`);
@@ -282,6 +290,30 @@ var Tidal = class TidalClass {
                 this.activeHighlight.bottom = conf.bottom;
             if (conf.left !== undefined)
                 this.activeHighlight.left = conf.left;
+        }
+    }
+
+    increaseHorizontalSplit() {
+        if (this.pool.increaseHorizontalSplit) {
+            this.pool.increaseHorizontalSplit(this.getActiveWindow());
+        }
+    }
+
+    decreaseHorizontalSplit() {
+        if (this.pool.decreaseHorizontalSplit) {
+            this.pool.decreaseHorizontalSplit(this.getActiveWindow());
+        }
+    }
+
+    increaseVerticalSplit() {
+        if (this.pool.increaseVerticalSplit) {
+            this.pool.increaseVerticalSplit(this.getActiveWindow());
+        }
+    }
+
+    decreaseVerticalSplit() {
+        if (this.pool.decreaseVerticalSplit) {
+            this.pool.decreaseVerticalSplit(this.getActiveWindow());
         }
     }
 }
