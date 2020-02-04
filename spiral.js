@@ -27,6 +27,8 @@ var Spiral = class SpiralClass {
                     w => w.window.get_workspace().index() === workspace &&
                     w.window.get_monitor() === monitor
                 ).length,
+                hSplit: 0,
+                vSplit: 0,
             };
 
             this.resetOrdering(workspace, monitor);
@@ -167,23 +169,23 @@ var Spiral = class SpiralClass {
                     windows[i].lastSize.x = work_area.x;
                     windows[i].lastSize.y = work_area.y;
                     windows[i].lastSize.width =
-                        (i < windows.length -1) ? new_width : work_area.width;
+                        (i < windows.length - 1) ? new_width + windows[i].hSplit : work_area.width;
                     windows[i].lastSize.height = work_area.height;
 
                     // adjust for the next window
-                    work_area.x = work_area.x + gaps + new_width;
-                    work_area.width = new_width;
+                    work_area.x = work_area.x + gaps + new_width + windows[i].hSplit;
+                    work_area.width = new_width - windows[i].hSplit;
                 } else {
                     let new_height = (work_area.height / 2) - (gaps / 2);
                     windows[i].lastSize.x = work_area.x;
                     windows[i].lastSize.y = work_area.y;
                     windows[i].lastSize.width = work_area.width;
                     windows[i].lastSize.height = 
-                        (i < windows.length - 1) ? new_height : work_area.height;
+                        (i < windows.length - 1) ? new_height + windows[i].vSplit : work_area.height;
 
                     // adjust for the next window
-                    work_area.y = work_area.y + gaps + new_height;
-                    work_area.height = new_height;
+                    work_area.y = work_area.y + gaps + new_height + windows[i].vSplit;
+                    work_area.height = new_height - windows[i].vSplit;
                 }
                 direction = direction ? 0 : 1;
             }
@@ -282,5 +284,47 @@ var Spiral = class SpiralClass {
 
         if (!swapped)
             this.resetWindow(window);
+    }
+
+    increaseHorizontalSplit(window) {
+        log(window);
+        if (!window || !this.windows[window.get_id()])
+            return;
+
+        this.log.debug(`spiral.js: Increasing horizontal split of ${window.get_id()}`);
+        this.windows[window.get_id()].hSplit += 10;
+        this.execute(window.get_workspace().index(), window.get_monitor());
+
+    }
+
+    decreaseHorizontalSplit(window) {
+        log(window);
+        if (!window || !this.windows[window.get_id()])
+            return;
+
+        this.log.debug(`spiral.js: Decreasing horizontal split of ${window.get_id()}`);
+        this.windows[window.get_id()].hSplit -= 10;
+        this.execute(window.get_workspace().index(), window.get_monitor());
+    }
+
+    increaseVerticalSplit(window) {
+        log(window);
+        if (!window || !this.windows[window.get_id()])
+            return;
+
+        this.log.debug(`spiral.js: Increasing vertical split of ${window.get_id()}`);
+        this.windows[window.get_id()].vSplit += 10;
+        this.execute(window.get_workspace().index(), window.get_monitor());
+
+    }
+
+    decreaseVerticalSplit(window) {
+        log(window);
+        if (!window || !this.windows[window.get_id()])
+            return;
+
+        this.log.debug(`spiral.js: Decreasing vertical split of ${window.get_id()}`);
+        this.windows[window.get_id()].vSplit -= 10;
+        this.execute(window.get_workspace().index(), window.get_monitor());
     }
 }

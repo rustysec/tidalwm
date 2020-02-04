@@ -451,6 +451,150 @@ function hotkeysWidget() {
     });
     row += 1;
 
+    label = new Gtk.Label({
+        label: 'Increase Horizontal Split:',
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    widget.attach(label, 0, row, 1, 1);
+
+    let increaseHSplitEntry = new Gtk.Entry({
+        visible: true
+    });
+    increaseHSplitEntry.set_text(this.settings.get_strv("increase-hsplit").join(","));
+    widget.attach(increaseHSplitEntry, 1, row, 1, 1);
+    increaseHSplitEntry.connect('changed', () => {
+        this.settings.set_strv("increase-hsplit", increaseHSplitEntry.get_text().split(","))
+        this.settings.apply();
+    });
+    row += 1;
+
+    label = new Gtk.Label({
+        label: 'Decrease Horizontal Split:',
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    widget.attach(label, 0, row, 1, 1);
+
+    let decreaseHSplitEntry = new Gtk.Entry({
+        visible: true
+    });
+    decreaseHSplitEntry.set_text(this.settings.get_strv("decrease-hsplit").join(","));
+    widget.attach(decreaseHSplitEntry, 1, row, 1, 1);
+    decreaseHSplitEntry.connect('changed', () => {
+        this.settings.set_strv("decrease-hsplit", decreaseHSplitEntry.get_text().split(","))
+        this.settings.apply();
+    });
+    row += 1;
+
+    label = new Gtk.Label({
+        label: 'Increase Vertical Split:',
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    widget.attach(label, 0, row, 1, 1);
+
+    let increaseVSplitEntry = new Gtk.Entry({
+        visible: true
+    });
+    increaseVSplitEntry.set_text(this.settings.get_strv("increase-vsplit").join(","));
+    widget.attach(increaseVSplitEntry, 1, row, 1, 1);
+    increaseVSplitEntry.connect('changed', () => {
+        this.settings.set_strv("increase-vsplit", increaseVSplitEntry.get_text().split(","))
+        this.settings.apply();
+    });
+    row += 1;
+
+    label = new Gtk.Label({
+        label: 'Decrease Vertical Split:',
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    widget.attach(label, 0, row, 1, 1);
+
+    let decreaseVSplitEntry = new Gtk.Entry({
+        visible: true
+    });
+    decreaseVSplitEntry.set_text(this.settings.get_strv("decrease-vsplit").join(","));
+    widget.attach(decreaseVSplitEntry, 1, row, 1, 1);
+    decreaseVSplitEntry.connect('changed', () => {
+        this.settings.set_strv("decrease-vsplit", decreaseVSplitEntry.get_text().split(","))
+        this.settings.apply();
+    });
+    row += 1;
+
+    label = new Gtk.Label({
+        label: 'Select Window Above:',
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    widget.attach(label, 0, row, 1, 1);
+
+    let selectWindowAboveEntry = new Gtk.Entry({
+        visible: true
+    });
+    selectWindowAboveEntry.set_text(this.settings.get_strv("select-window-above").join(","));
+    widget.attach(selectWindowAboveEntry, 1, row, 1, 1);
+    selectWindowAboveEntry.connect('changed', () => {
+        this.settings.set_strv("select-window-above", selectWindowAboveEntry.get_text().split(","))
+        this.settings.apply();
+    });
+    row += 1;
+
+    label = new Gtk.Label({
+        label: 'Select Window Below:',
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    widget.attach(label, 0, row, 1, 1);
+
+    let selectWindowBelowEntry = new Gtk.Entry({
+        visible: true
+    });
+    selectWindowBelowEntry.set_text(this.settings.get_strv("select-window-below").join(","));
+    widget.attach(selectWindowBelowEntry, 1, row, 1, 1);
+    selectWindowBelowEntry.connect('changed', () => {
+        this.settings.set_strv("select-window-below", selectWindowBelowEntry.get_text().split(","))
+        this.settings.apply();
+    });
+    row += 1;
+
+    label = new Gtk.Label({
+        label: 'Select Window Left:',
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    widget.attach(label, 0, row, 1, 1);
+
+    let selectWindowLeftEntry = new Gtk.Entry({
+        visible: true
+    });
+    selectWindowLeftEntry.set_text(this.settings.get_strv("select-window-left").join(","));
+    widget.attach(selectWindowLeftEntry, 1, row, 1, 1);
+    selectWindowLeftEntry.connect('changed', () => {
+        this.settings.set_strv("select-window-left", selectWindowLeftEntry.get_text().split(","))
+        this.settings.apply();
+    });
+    row += 1;
+
+    label = new Gtk.Label({
+        label: 'Select Window Right:',
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    widget.attach(label, 0, row, 1, 1);
+
+    let selectWindowRightEntry = new Gtk.Entry({
+        visible: true
+    });
+    selectWindowRightEntry.set_text(this.settings.get_strv("select-window-right").join(","));
+    widget.attach(selectWindowRightEntry, 1, row, 1, 1);
+    selectWindowRightEntry.connect('changed', () => {
+        this.settings.set_strv("select-window-right", selectWindowRightEntry.get_text().split(","))
+        this.settings.apply();
+    });
+    row += 1;
+
     // Return our widget which will be added to the window
     return widget;
 }

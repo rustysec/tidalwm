@@ -30,17 +30,6 @@ Some notes about compatibility:
 [kitty](https://sw.kovidgoyal.net/kitty/) or
 [alacritty](https://github.com/alacritty/alacritty)
 
-## Shortcuts
-#### Float Window
-Takes the focused window, removes it from tiling and forces it to be always on top
-
-Ex: `[Ctrl-Alt-f]`
-
-#### Rotate Windows
-Reorders the windows within the `spiral` tiling configuration.
-
-Ex: `[Ctrl-Alt-o]`
-
 ## Current Features
 * Automatic spiral tiling
 * Adjustable gaps
@@ -50,6 +39,8 @@ Ex: `[Ctrl-Alt-o]`
 * Customizable tiling exemption lists
 * Customizable hotkeys for floating and rotating order
 * Customizable initial split direction (horizontal vs vertical)
+* Increase/decrease split values via hotkeys
+* Direct window navigation (left, right, above, below) with hotkeys
 * **Dynamic workspaces** are now supported!
 
 ## Configuration
@@ -87,6 +78,14 @@ of life settings to make it more pleasant to use.
 |-------|-----------|
 |`Float Window`|Floats the focused window, ex: `<Ctrl><Alt>f`|
 |`Rotate Windows`|Automatically rotate windows through the tiling order, ex: `<Ctrl><Alt>r`|
+|`Increase Vertical Split`|Increase the hight of the current window, ex: `<Shift><Super>Up`|
+|`Decrease Vertical Split`|Decrease the hight of the current window, ex: `<Shift><Super><Alt>Down`|
+|`Increase Horizontal Split`|Increase the width of the current window, ex: `<Shift><Super>Right`|
+|`Decrease Horizontal Split`|Decrease the width of the current window, ex: `<Shift><Super>Left`|
+|`Select Window To Left`|Focuses the window directly to the left of the current, ex: `<Super>h,<Super>Left`|
+|`Select Window To Right`|Focuses the window directly to the right of the current, ex: `<Super>h,<Super>Left`|
+|`Select Window To Above`|Focuses the window directly above the current, ex: `<Super>h,<Super>Left`|
+|`Select Window To Below`|Focuses the window directly below the current, ex: `<Super>h,<Super>Left`|
 
 ## FAQ
 ### Why is this a thing?

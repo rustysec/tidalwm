@@ -78,7 +78,7 @@ var Tidal = class TidalClass {
         let opacity = (this.settings.get_int("inactive-opacity") / 100) * 255;
         let highlight = this.settings.get_boolean("highlight-active") && this.activeHighlight;
 
-        if (highlight) {
+        if (highlight && this.activeHighlight.hide) {
             this.activeHighlight.hide();
         }
 
@@ -95,6 +95,9 @@ var Tidal = class TidalClass {
                                 .get_display()
                                 .get_monitor_scale(meta.get_monitor());
 
+                        if (highlight && (!this.activeHighlight || !this.activeHighlight.show)) {
+                            this.activeHighlight = new ActiveHighlight(this.settings);
+                        }
                         this.activeHighlight.window = meta;
                         this.activeHighlight.show();
                         this.activeHighlight.refresh();
@@ -105,6 +108,14 @@ var Tidal = class TidalClass {
                 }
             }
         });
+    }
+
+    // walk the window list and adjust opacities accordingly
+    getActiveWindow() {
+        return global.get_window_actors().filter(actor => {
+            let meta = actor.get_meta_window();
+            return meta && meta.get_window_type() == 0 && meta.appears_focused;
+        }).map(actor => actor.get_meta_window())[0];
     }
 
     closeWindow(window) {
@@ -283,5 +294,61 @@ var Tidal = class TidalClass {
             if (conf.left !== undefined)
                 this.activeHighlight.left = conf.left;
         }
+    }
+
+    increaseHorizontalSplit() {
+        if (this.pool.increaseHorizontalSplit) {
+            this.pool.increaseHorizontalSplit(this.getActiveWindow());
+        }
+    }
+
+    decreaseHorizontalSplit() {
+        if (this.pool.decreaseHorizontalSplit) {
+            this.pool.decreaseHorizontalSplit(this.getActiveWindow());
+        }
+    }
+
+    increaseVerticalSplit() {
+        if (this.pool.increaseVerticalSplit) {
+            this.pool.increaseVerticalSplit(this.getActiveWindow());
+        }
+    }
+
+    decreaseVerticalSplit() {
+        if (this.pool.decreaseVerticalSplit) {
+            this.pool.decreaseVerticalSplit(this.getActiveWindow());
+        }
+    }
+
+    selectWindow(direction) {
+        let active = this.getActiveWindow();
+        if (!active)
+            return;
+
+        let rect = active.get_frame_rect();
+        let gaps = this.settings.get_int("window-gaps");
+        let scale = active.get_display().get_monitor_scale(active.get_monitor()) * 2;
+
+        let offset = (gaps * scale) + (scale * 2);
+
+        if (direction.above) {
+            rect.y -= offset;
+        } else if (direction.below) {
+            rect.y += offset;
+        } else if (direction.left) {
+            rect.x -= offset;
+        } else if (direction.right) {
+            rect.x += offset;
+        }
+
+        active.get_workspace().list_windows().forEach(window => {
+            if (window !== active) {
+                let other = window.get_frame_rect();
+                if (rect.overlap(other)) {
+                    this.log.debug(`${active.get_id()} has a neighbor ${window.get_id()}`);
+                    window.focus(0);
+                }
+            }
+        });
     }
 }
