@@ -95,6 +95,9 @@ var Tidal = class TidalClass {
                                 .get_display()
                                 .get_monitor_scale(meta.get_monitor());
 
+                        if (highlight && (!this.activeHighlight || !this.activeHighlight.show)) {
+                            this.activeHighlight = new ActiveHighlight(this._settings);
+                        }
                         this.activeHighlight.window = meta;
                         this.activeHighlight.show();
                         this.activeHighlight.refresh();
