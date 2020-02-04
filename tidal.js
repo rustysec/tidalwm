@@ -96,6 +96,7 @@ var Tidal = class TidalClass {
                                 .get_monitor_scale(meta.get_monitor());
 
                         if (highlight && (!this.activeHighlight || !this.activeHighlight.show)) {
+                            this.log.debug(`tidal.js: ActiveHighlight was lost`);
                             this.activeHighlight = new ActiveHighlight(this.settings);
                         }
                         this.activeHighlight.window = meta;
@@ -145,7 +146,7 @@ var Tidal = class TidalClass {
             let id = window.get_id();
             if (this.windows[id] && !this.windows[id].floating) {
                 this.pool.resetWindow(window);
-                this.activeHighlight = window;
+                this.activeHighlight.window = window;
             }
         }
     }
