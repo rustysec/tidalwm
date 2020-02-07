@@ -1,6 +1,7 @@
-const Clutter = imports.gi.Clutter;
-const GObject = imports.gi.GObject;
-const Main    = imports.ui.main;
+const Clutter   = imports.gi.Clutter;
+const GObject   = imports.gi.GObject;
+const Main      = imports.ui.main;
+const Meta      = imports.gi.Meta;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
@@ -115,11 +116,11 @@ var Tidal = class TidalClass {
             let meta = actor.get_meta_window();
             if (meta && meta.get_window_type() == 0 && !meta.minimized) {
                 if (meta.appears_focused || meta.is_attached_dialog()) {
-                    this.log.debug(`tidal.js: window ${meta.get_id()} focused`);
+                    this.log.verbose(`tidal.js: window ${meta.get_id()} focused`);
                     actor.opacity = 255;
 
                     if (highlight && meta.get_workspace().index() === global.workspace_manager.get_active_workspace_index()) {
-                        this.log.debug(`tidal.js: adding highlight to ${meta.get_id()}`);
+                        this.log.verbose(`tidal.js: adding highlight to ${meta.get_id()}`);
                         let scale = meta.get_workspace()
                                 .get_display()
                                 .get_monitor_scale(meta.get_monitor());
@@ -150,7 +151,7 @@ var Tidal = class TidalClass {
 
     closeWindow(window) {
         let id = window.get_id();
-        this.log.debug(`tidal.js: closing window ${id}`);
+        this.log.verbose(`tidal.js: closing window ${id}`);
         this.pool.removeWindow(window);
         
         delete this.windows[id];
@@ -373,12 +374,45 @@ var Tidal = class TidalClass {
 
         active.get_workspace().list_windows().forEach(window => {
             if (window !== active) {
+                let otherOffset = this.getWorkspaceOffsets(window);
                 let other = window.get_frame_rect();
+
+                if (direction && direction.left) {
+                    other.x += otherOffset.horizontalOffset;
+                    other.width += 2 * otherOffset.horizontalOffset;
+                } else if (direction && direction.right) {
+                    other.x -= otherOffset.horizontalOffset;
+                    other.width += 2 * otherOffset.horizontalOffset;
+                } else if (direction && direction.below) {
+                    other.y -= otherOffset.verticalOffset;
+                    other.height += 2 * otherOffset.verticalOffset;
+                } else if (direction && direction.above) {
+                    other.y -= otherOffset.verticalOffset;
+                    other.height += 2 * otherOffset.verticalOffset;
+                }
+
                 if (rect.overlap(other)) {
                     this.log.debug(`${active.get_id()} has a neighbor ${window.get_id()}`);
                     window.focus(0);
                 }
             }
         });
+    }
+
+    getWorkspaceOffsets(window) {
+        let rect = window.get_frame_rect();
+        let monitorWorkArea =
+            window.get_workspace()
+            .get_work_area_for_monitor(window.get_monitor());
+        let monitorGeometry = global.display.get_monitor_geometry(window.get_monitor());
+        let scale = window.get_display().get_monitor_scale(window.get_monitor());
+
+        let verticalOffset = (monitorGeometry.height - monitorWorkArea.height);
+        let horizontalOffset = (monitorGeometry.width - monitorWorkArea.width);
+
+        return {
+            horizontalOffset,
+            verticalOffset
+        };
     }
 }
