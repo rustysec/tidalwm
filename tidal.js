@@ -47,19 +47,48 @@ var Tidal = class TidalClass {
 
             let tidal = this;
             window.connect("focus", (window) => this.windowFocusChanged(tidal, window));
+            window.connect("shown", (window) => this.windowShown(tidal, window));
+            window.get_compositor_private().connect("effects-completed", (window) => this.checkWindowMinimized(tidal, window));
 
             this.windows[id] = {
                 id,
                 workspace,
                 monitor,
                 window,
-                floating
+                floating,
+                minimized: window.minimized
             };
 
             if (!floating) {
                 this.pool.addWindow(window);
             }
 
+            this.setWindowOpacities();
+        }
+    }
+
+    checkWindowMinimized(tidal, window) {
+        let meta = window.get_meta_window();
+
+        if (meta.minimized) {
+            tidal.log.verbose(`tidal.js: window ${meta.get_id()} minimized`);
+            this.windows[meta.get_id()].minimized = true;
+            let workspace = meta.get_workspace().index();
+            let monitor = meta.get_monitor();
+            this.pool.execute(workspace, monitor);
+            this.setWindowOpacities();
+        }
+    }
+
+    windowShown(tidal, meta) {
+        let id = meta.get_id();
+
+        if (this.windows[id].minimized && !meta.minimized) {
+            tidal.log.verbose(`tidal.js: window ${meta.get_id()} shown`);
+            this.windows[id].minimized = meta.minimized;
+            let workspace = meta.get_workspace().index();
+            let monitor = meta.get_monitor();
+            this.pool.execute(workspace, monitor);
             this.setWindowOpacities();
         }
     }
@@ -84,7 +113,7 @@ var Tidal = class TidalClass {
 
         global.get_window_actors().forEach(actor => {
             let meta = actor.get_meta_window();
-            if (meta && meta.get_window_type() == 0) {
+            if (meta && meta.get_window_type() == 0 && !meta.minimized) {
                 if (meta.appears_focused || meta.is_attached_dialog()) {
                     this.log.debug(`tidal.js: window ${meta.get_id()} focused`);
                     actor.opacity = 255;

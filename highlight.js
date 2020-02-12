@@ -90,7 +90,7 @@ class ActiveHighlight {
     }
 
     refresh() {
-        if (this._window) {
+        if (this._window && !this._window.minimized) {
             let rect = this._window.get_frame_rect();
             let borderWidth = this._borderWidth *
                 this._window

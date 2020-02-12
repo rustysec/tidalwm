@@ -57,7 +57,7 @@ var Spiral = class SpiralClass {
 
     // calculate where a window is vs where it was, update both
     updateWindow(window) {
-        if (window) {
+        if (window && !window.minimized) {
             let id = window.get_id();
             this.log.log(`spiral.js: updating window ${id}`);
 
@@ -83,7 +83,7 @@ var Spiral = class SpiralClass {
     // zero index the ordering and make sure it's contiguous 
     resetOrdering(workspace, monitor) {
         Object.values(this.windows)
-            .filter(item => item.workspace === workspace && item.monitor === monitor)
+            .filter(item => item.workspace === workspace && item.monitor === monitor && !item.window.minimized)
             .sort((a, b) => {
                 if (a.order > b.order) return 1;
                 if (a.order < b.order) return -1;
@@ -103,20 +103,12 @@ var Spiral = class SpiralClass {
 
             this.execute(workspace, monitor);
 
-            /*
-            item.window.move_resize_frame(true,
-                item.lastSize.x,
-                item.lastSize.y,
-                item.lastSize.width,
-                item.lastSize.height,
-            );
-            */
         }
     }
 
     getSortedWindows(workspace, monitor) {
         return Object.values(this.windows)
-            .filter(item => item.workspace === workspace && item.monitor === monitor)
+            .filter(item => item.workspace === workspace && item.monitor === monitor && !item.window.minimized)
             .sort((a, b) => {
                 if (a.order > b.order) return 1;
                 if (a.order < b.order) return -1;
