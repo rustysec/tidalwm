@@ -356,11 +356,11 @@ var Tidal = class TidalClass {
         if (!active)
             return;
 
-        let rect = active.get_frame_rect();
         let gaps = this.settings.get_int("window-gaps");
         let scale = active.get_display().get_monitor_scale(active.get_monitor()) * 2;
 
-        let offset = (gaps * scale) + (scale * 2);
+        let rect = this.getWindowRectForMove(active);
+        let offset = (gaps * scale) * 2;
 
         if (direction.above) {
             rect.y -= offset;
@@ -374,22 +374,7 @@ var Tidal = class TidalClass {
 
         active.get_workspace().list_windows().forEach(window => {
             if (window !== active) {
-                let otherOffset = this.getWorkspaceOffsets(window);
-                let other = window.get_frame_rect();
-
-                if (direction && direction.left) {
-                    other.x += otherOffset.horizontalOffset;
-                    other.width += 2 * otherOffset.horizontalOffset;
-                } else if (direction && direction.right) {
-                    other.x -= otherOffset.horizontalOffset;
-                    other.width += 2 * otherOffset.horizontalOffset;
-                } else if (direction && direction.below) {
-                    other.y -= otherOffset.verticalOffset;
-                    other.height += 2 * otherOffset.verticalOffset;
-                } else if (direction && direction.above) {
-                    other.y -= otherOffset.verticalOffset;
-                    other.height += 2 * otherOffset.verticalOffset;
-                }
+                let other = this.getWindowRectForMove(window);
 
                 if (rect.overlap(other)) {
                     this.log.debug(`${active.get_id()} has a neighbor ${window.get_id()}`);
@@ -399,20 +384,26 @@ var Tidal = class TidalClass {
         });
     }
 
-    getWorkspaceOffsets(window) {
-        let rect = window.get_frame_rect();
-        let monitorWorkArea =
-            window.get_workspace()
-            .get_work_area_for_monitor(window.get_monitor());
-        let monitorGeometry = global.display.get_monitor_geometry(window.get_monitor());
+    getWindowRectForMove(window) {
+        let monitor = window.get_monitor();
+        let workspace = window.get_workspace();
         let scale = window.get_display().get_monitor_scale(window.get_monitor());
 
-        let verticalOffset = (monitorGeometry.height - monitorWorkArea.height);
-        let horizontalOffset = (monitorGeometry.width - monitorWorkArea.width);
+        let workArea = workspace.get_work_area_for_monitor(monitor);
+        let monitorGeometry = global.display.get_monitor_geometry(monitor);
 
-        return {
-            horizontalOffset,
-            verticalOffset
-        };
+        let rect = window.get_frame_rect();
+
+        let yOffset = (monitorGeometry.height - workArea.height);
+
+        let xOffset = (monitorGeometry.width - workArea.width);
+
+        rect.y -= yOffset;
+        rect.height += yOffset * 2;
+
+        rect.x -= xOffset;
+        rect.width += xOffset * 2;
+
+        return rect;
     }
 }
