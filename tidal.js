@@ -360,7 +360,7 @@ var Tidal = class TidalClass {
         let scale = active.get_display().get_monitor_scale(active.get_monitor()) * 2;
 
         let rect = this.getWindowRectForMove(active);
-        let offset = (gaps * scale) * 2;
+        let offset = ((gaps * scale) * 2) + 1;
 
         if (direction.above) {
             rect.y -= offset;
