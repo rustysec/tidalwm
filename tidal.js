@@ -44,7 +44,10 @@ var Tidal = class TidalClass {
 
             let alwaysFloat = this.settings.get_strv("always-float")[0].split(",");
             let wmClass = window.get_wm_class();
-            let floating = isFloating || alwaysFloat.includes(wmClass);
+            let windowTitle = window.get_title();
+            let floating = isFloating
+                || alwaysFloat.includes(wmClass)
+                || alwaysFloat.includes(windowTitle);
 
             let tidal = this;
             window.connect("focus", (window) => this.windowFocusChanged(tidal, window));

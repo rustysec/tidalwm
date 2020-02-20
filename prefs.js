@@ -620,7 +620,7 @@ function miscWidget() {
 
     let radio_logging_info = new Gtk.RadioButton({label: 'Info', visible: true});
     let radio_logging_debug = new Gtk.RadioButton({label: 'Debug', visible: true, group: radio_logging_info});
-    let radio_logging_verbose = new Gtk.RadioButton({label: 'Verbosd', visible: true, group: radio_logging_info});
+    let radio_logging_verbose = new Gtk.RadioButton({label: 'Verbose', visible: true, group: radio_logging_info});
 
     radio_logging_info.connect('toggled', () => this.settings.set_int("log-level", 0));
     radio_logging_debug.connect('toggled', () => this.settings.set_int("log-level", 1));

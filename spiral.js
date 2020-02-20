@@ -102,7 +102,6 @@ var Spiral = class SpiralClass {
             let monitor = window.get_monitor();
 
             this.execute(workspace, monitor);
-
         }
     }
 
@@ -279,7 +278,6 @@ var Spiral = class SpiralClass {
     }
 
     increaseHorizontalSplit(window) {
-        log(window);
         if (!window || !this.windows[window.get_id()])
             return;
 
@@ -290,7 +288,6 @@ var Spiral = class SpiralClass {
     }
 
     decreaseHorizontalSplit(window) {
-        log(window);
         if (!window || !this.windows[window.get_id()])
             return;
 
@@ -300,7 +297,6 @@ var Spiral = class SpiralClass {
     }
 
     increaseVerticalSplit(window) {
-        log(window);
         if (!window || !this.windows[window.get_id()])
             return;
 
@@ -311,7 +307,6 @@ var Spiral = class SpiralClass {
     }
 
     decreaseVerticalSplit(window) {
-        log(window);
         if (!window || !this.windows[window.get_id()])
             return;
 

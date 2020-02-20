@@ -269,8 +269,8 @@ class Extension {
         let actor = window.get_compositor_private();
 
         let id = actor.connect('first-frame', () =>  {
-            this.log.verbose(`extension.js: window of type ${window.get_window_type()} and class ${window.get_wm_class()} reached first-frame`);
-            if (window.get_window_type() == 0 && window.get_wm_class() !== null) {
+            this.log.verbose(`extension.js: window of type ${window.get_window_type()}, class ${window.get_wm_class()}, and title ${window.get_title()} reached first-frame`);
+            if (window.get_window_type() == 0) {
                 this._tidal.addWindow(window);
             }
             actor.disconnect(id);
