@@ -1,5 +1,8 @@
 const Meta = imports.gi.Meta;
 
+const HORIZONTAL = 0;
+const VERTICAL = 1;
+
 var Swayi3 = class Swayi3Class {
     constructor(settings, logging) {
         this.settings = settings;
@@ -27,6 +30,8 @@ var Swayi3 = class Swayi3Class {
                 children: null,
                 parent: null,
                 active: true,
+                direction: VERTICAL,
+                //direction: HORIZONTAL,
             };
         } else {
             let activeContainer = containers.filter(container => container.active)[0] || container[0];
@@ -158,23 +163,45 @@ var Swayi3 = class Swayi3Class {
 
         this.log.log(`swayi3.js: mapping container ${container.id}`);
 
-        if (container.children) {
-            this.log.log(`swayi3.js: mapping children`);
-        } else {
-            this.log.log(`swayi3.js: mapping windows`);
-            let width = (workArea.width - ((container.windows.length - 1) * gaps)) / container.windows.length;
-            let x = workArea.x;
+        let length = (container.children && container.children.length) || (container.windows && container.windows.length);
 
-            for (var i = 0; i < container.windows.length; i++) {
-                container.windows[i].move_resize_frame(true,
-                    x,
-                    workArea.y,
-                    width,
-                    workArea.height
-                );
+        let x_y = container.direction == HORIZONTAL ? workArea.x : workArea.y;
+        let h_w = container.direction == HORIZONTAL ?
+                (workArea.width - ((container.windows.length - 1) * gaps)) / container.windows.length :
+                (workArea.height - ((container.windows.length - 1) * gaps)) / container.windows.length;
 
-                x += gaps + width;
+
+        for (var i = 0; i < length; i++) {
+            let geometry = {};
+
+            if (container.direction == HORIZONTAL) {
+                geometry = {
+                    x: x_y,
+                    y: workArea.y,
+                    width: h_w,
+                    height: workArea.height
+                };
+            } else {
+                geometry = {
+                    x: workArea.x,
+                    y: x_y,
+                    width: workArea.width,
+                    height: h_w
+                };
             }
+
+            if (container.windows) {
+                container.windows[i].move_resize_frame(true,
+                    geometry.x,
+                    geometry.y,
+                    geometry.width,
+                    geometry.height
+                );
+            } else {
+                // map sub-containers into this space
+            }
+
+            x_y += gaps + h_w;
         }
     }
 }
