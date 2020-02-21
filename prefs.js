@@ -370,9 +370,9 @@ function tilingWidget() {
     let radio_binary = new Gtk.RadioButton({label: 'Binary', visible: true, group: radio_spiral});
     let radio_i3 = new Gtk.RadioButton({label: 'i3/Sway', visible: true, group: radio_spiral});
 
+    radio_i3.set_sensitive(true);
     // awaiting implementation
     radio_binary.set_sensitive(false);
-    radio_i3.set_sensitive(false);
 
     widget.attach(radio_spiral, 1, row, 1, 1);
     row += 1;
@@ -380,6 +380,9 @@ function tilingWidget() {
     row += 1;
     widget.attach(radio_i3, 1, row, 1, 1);
     row += 1;
+
+    radio_spiral.connect('toggled', () => this.settings.set_int("tile-mode", 0));
+    radio_i3.connect('toggled', () => this.settings.set_int("tile-mode", 1));
 
     /*** Initial Split Direction ***/
     label = new Gtk.Label({

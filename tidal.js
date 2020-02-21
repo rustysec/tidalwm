@@ -7,6 +7,7 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const ActiveHighlight = Me.imports.highlight.ActiveHighlight;
 const Spiral = Me.imports.spiral.Spiral;
+const Swayi3 = Me.imports.swayi3.Swayi3;
 
 var Tidal = class TidalClass {
 
@@ -21,8 +22,10 @@ var Tidal = class TidalClass {
         let tilingMode = this.settings.get_int("tile-mode");
         if (tilingMode == 0) {
             this.poolType = Spiral;
+        } else if (tilingMode == 1) {
+            this.poolType = Swayi3;
         } else {
-            log.log.log(`tidal.js: unsupported tiling mode ${tilingMode}, using spiral`);
+            this.log.log(`tidal.js: unsupported tiling mode ${tilingMode}, using spiral`);
         }
 
         this.pool = new this.poolType(this.settings, this.log);
