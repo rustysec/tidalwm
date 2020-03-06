@@ -107,7 +107,7 @@ var Spiral = class SpiralClass {
 
     getSortedWindows(workspace, monitor) {
         return Object.values(this.windows)
-            .filter(item => item.workspace === workspace && item.monitor === monitor && !item.window.minimized)
+            .filter(item => item.workspace === workspace && item.monitor === monitor && !item.window.minimized && !item.window.is_fullscreen())
             .sort((a, b) => {
                 if (a.order > b.order) return 1;
                 if (a.order < b.order) return -1;
