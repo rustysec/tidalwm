@@ -1,5 +1,4 @@
-
-const { Clutter, GObject, St } = imports.gi;
+const { Clutter, GObject, St, Meta } = imports.gi;
 
 var ActiveHighlight = 
 class ActiveHighlight {
@@ -33,8 +32,8 @@ class ActiveHighlight {
             }
 
             this._window = w;
-            this._windowSignal = this._window.connect("size-changed", (w) => this.windowShown(this, w));
-            this._windowSignal = this._window.connect("position-changed", (w) => this.windowShown(this, w));
+            this._windowSignalSizeChanged = this._window.connect("size-changed", (w) => this.windowShown(this, w));
+            this._windowSignalPositionChanged = this._window.connect("position-changed", (w) => this.windowShown(this, w));
             this.refresh();
         }
     }
@@ -89,8 +88,27 @@ class ActiveHighlight {
         self.refresh();
     }
 
+    windowIsMaximized() {
+        if (this._window) {
+            let monitor = this._window.get_monitor();
+            let workArea = this._window.get_workspace().get_work_area_for_monitor(monitor);
+            let windowFrame = this._window.get_frame_rect();
+            let maxed = workArea.x === windowFrame.x &&
+                workArea.y === windowFrame.y &&
+                workArea.width === windowFrame.width &&
+                workArea.height === windowFrame.height;
+            return maxed;
+        } else {
+            return false;
+        }
+    }
+
     refresh() {
-        if (this._window && !this._window.minimized) {
+        if (
+            this._window &&
+            !this._window.minimized &&
+            !this.windowIsMaximized()
+        ) {
             let rect = this._window.get_frame_rect();
             let borderWidth = this._borderWidth *
                 this._window
@@ -128,6 +146,7 @@ class ActiveHighlight {
                     rect.x + rect.width,
                     rect.y
                 );
+                this._highlightRight.show();
             }
 
             if (this._borderLeft) {
@@ -137,6 +156,7 @@ class ActiveHighlight {
                     rect.x - borderWidth,
                     rect.y
                 );
+                this._highlightLeft.show();
             }
 
         } else {
