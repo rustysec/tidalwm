@@ -3,83 +3,81 @@ const Meta = imports.gi.Meta;
 const HORIZONTAL = 0;
 const VERTICAL = 1;
 
-var Swayi3 = class Swayi3Class {
-    constructor(settings, logging) {
-        this.settings = settings;
-        this.log = logging;
-        this.containers = {};
-        this.windows = {};
+const WINDOW = 0;
+const CONTAINER = 1;
+
+class Container {
+    constructor(window) {
+        log(`swayi3.js; creating new container for ${window.get_id()}`);
+        this.window = window;
+        this.children = [];
+        this.type = CONTAINER;
+        this.direction = HORIZONTAL;
+        this.active = true;
+    }
+
+    refresh() {
+        if (this._window && this._window.get_workspace()) {
+            this._monitor = this._window.get_monitor();
+            this._workspace = this._window.get_workspace() && window.get_workspace().index();
+        }
     }
 
     addWindow(window) {
-        this.windows[window.get_id()] = {
-            monitor: window.get_monitor(),
-            workspace: window.get_workspace().index()
-        };
-
-        let containers = this.getContainers(window.get_workspace().index(), window.get_monitor());
-        if (containers.length == 0) {
-            let id = this.getNextContainerId();
-            this.log.log(`swayi3.js: adding window ${window.get_id()} to root container ${id}`);
-
-            this.windows[window.get_id()].containerId = id;
-
-            this.containers[id] = {
-                id,
-                windows: [ window ],
-                children: null,
-                parent: null,
-                active: true,
-                direction: VERTICAL,
-                //direction: HORIZONTAL,
-            };
-        } else {
-            let activeContainer = containers.filter(container => container.active)[0] || container[0];
-            this.log.log(`swayi3.js: adding to active container ${activeContainer.id}`);
-
-            if (activeContainer.windows) {
-                activeContainer.windows.push(window);
-                this.windows[window.get_id()].containerId = activeContainer.id;
-            } else {
-                let id = this.getNextContainerId();
-                this.log.log(`swayi3.js: adding new container ${id}`);
-                this.windows[window.get_id()].containerId = id;
-
-                this.containers[id] = {
-                    id,
-                    windows: [ window ],
-                    children: null,
-                    parent: activeContainer.id,
-                    active: true,
-                };
-
-                activeContainer.children.push(id);
-            }
+        if (this.active && this.winodw) {
+            this.children.push(new Container(this.window));
+            this.window = null;
         }
-
-        this.execute(window.get_workspace().index(), window.get_monitor());
+        this.children.push(new Container(window));
     }
 
-    getContainers(workspace, monitor) {
-        return Object.values(this.containers)
-            .filter(container =>
-                container.windows.every(window => window.get_workspace().index() == workspace) &&
-                container.windows.every(window => window.get_monitor() == monitor)
-            );
+    workspaceAndMonitor() {
+        if (this.window) {
+            log(`swayi3.js: this is a window container`);
+            return {
+                workspace: this.window().get_workspace().index(),
+                monitor: this.window.get_monitor()
+            }
+        } else {
+            for (var i = 0; i < this.children.length; i++) {
+                let result = this.children[i].workspaceAndMonitor();
+                if (result) {
+                    return result;
+                }
+            }
+        }
+    }
+
+    mapInto(workArea) {
+        log(`mapInto()`);
+    }
+}
+
+var Swayi3 = class Swayi3Class {
+    constructor(settings, logging, getActiveWindow) {
+        this.settings = settings;
+        this.log = logging;
+        this.containers = [];
+        this.windows = {};
+        this.getActiveWindow = getActiveWindow;
+    }
+
+    addWindow(window) {
+        log(`swayi3.js: add window {window.get_id()}`);
+
+        let workspace = window.get_workspace().index();
+        let monitor = window.get_monitor();
+
+        let container = this.getRootContainer(workspace, monitor) ||
+            new Container(window);
+
+        this.execute(workspace, monitor);
     }
 
     getNextContainerId() {
-        let keys = Object.keys(this.containers);
-        return keys.length ? Math.max(...keys) + 1 : 0;
     }
 
     removeWindow(window) {
-        this.log.log(`swayi3.js: removing window ${window.get_id()}`);
-        let windowItem = this.windows[window.get_id()];
-
-        let container = this.containers[windowItem.containerId];
-        container.windows = container.windows.filter(w => w.get_id() !== window.get_id());
-        this.execute(windowItem.workspace, windowItem.monitor);
     }
 
     updateWindow(window) {
@@ -123,31 +121,35 @@ var Swayi3 = class Swayi3Class {
     }
 
     execute(workspace, monitor) {
-        let containers = this.getContainers(workspace, monitor);
+        log(`swayi3.js: execute(${workspace}, ${monitor})`);
+        let root = this.getRootContainer(workspace, monitor);
         let smartGaps = this.settings.get_boolean("smart-gaps");
 
-        let gaps = (smartGaps && containers.length == 1) ? 0 :
-            this.settings.get_int("window-gaps") *
+        let gaps = this.settings.get_int("window-gaps") *
             global.workspace_manager.get_workspace_by_index(workspace)
                 .get_display()
                 .get_monitor_scale(monitor);
 
         let ws = global.workspace_manager.get_workspace_by_index(workspace);
-        let work_area = ws.get_work_area_for_monitor(monitor);
+        let workArea = ws.get_work_area_for_monitor(monitor);
 
-        work_area.x = work_area.x + gaps;
-        work_area.y = work_area.y + gaps;
-        work_area.width = work_area.width - (gaps * 2);
-        work_area.height = work_area.height - (gaps * 2);
+        /*
+        workArea.x = workArea.x + gaps;
+        workArea.y = workArea.y + gaps;
+        workArea.width = workArea.width - (gaps * 2);
+        workArea.height = workArea.height - (gaps * 2);
+        */
 
-        let direction = this.settings.get_int("initial-direction");
+        this.log.debug(`swayi3.js: executing on ${workspace}, ${monitor}`);
 
-        //this.cacheWindows();
-        this.log.debug(`swayi3.js: executing on ${workspace}, ${monitor} with ${containers.length} containers`);
+        root.mapInto(workArea, gaps, smartGaps);
+    }
 
-        let root = containers.filter(container => container.parent === null)[0];
-
-        this.mapWindowsIntoWorkArea(root, work_area, workspace, monitor);
+    getRootContainer(ws, mon) {
+        return this.containers.filter(container => {
+            let {workspace, monitor} = container.workspaceAndMonitor();
+            return workspace === ws && monitor === mon;
+        })[0] || null;
     }
 
     mapWindowsIntoWorkArea(container, workArea, workspace, monitor) {
@@ -161,14 +163,14 @@ var Swayi3 = class Swayi3Class {
                 .get_display()
                 .get_monitor_scale(monitor);
 
-        this.log.log(`swayi3.js: mapping container ${container.id}`);
+        this.log.log(`swayi3.js: mapping container ${container.id} into ${JSON.stringify(workArea)}`);
 
-        let length = (container.children && container.children.length) || (container.windows && container.windows.length);
+        let length = (container.children && container.children.length) || 1;
 
         let x_y = container.direction == HORIZONTAL ? workArea.x : workArea.y;
         let h_w = container.direction == HORIZONTAL ?
-                (workArea.width - ((container.windows.length - 1) * gaps)) / container.windows.length :
-                (workArea.height - ((container.windows.length - 1) * gaps)) / container.windows.length;
+                (workArea.width - ((length - 1) * gaps)) / length :
+                (workArea.height - ((length - 1) * gaps)) / length;
 
 
         for (var i = 0; i < length; i++) {
@@ -190,8 +192,9 @@ var Swayi3 = class Swayi3Class {
                 };
             }
 
-            if (container.windows) {
-                container.windows[i].move_resize_frame(true,
+            if (container.type == WINDOW) {
+                this.log.log(`swayi3.js: mapping in window to ${JSON.stringify(geometry)}`);
+                container.window.move_resize_frame(true,
                     geometry.x,
                     geometry.y,
                     geometry.width,
@@ -199,9 +202,36 @@ var Swayi3 = class Swayi3Class {
                 );
             } else {
                 // map sub-containers into this space
+                this.log.log(`swayi3.js: mapping in sub-container`);
+                if (container.children && container.children[i]) {
+                    this.mapWindowsIntoWorkArea(container.children[i], geometry, workspace, monitor);
+                }
             }
 
             x_y += gaps + h_w;
         }
+    }
+
+    vsplitContainer() {
+        this.log.log(`swayi3.js: vsplitContainer()`);
+        let window = this.getActiveWindow();
+        this.log.log(`swayi3.js: active window is ${window.get_id()}`);
+    }
+
+    hsplitContainer() {
+        this.log.log(`swayi3.js: hsplitContainer()`);
+        let window = this.getActiveWindow();
+        this.log.log(`swayi3.js: active window is ${window.get_id()}`);
+    }
+
+    splitWindow(window, direction) {
+        if (!window && !this.windows[window.get_id()])
+            return;
+
+        this.log.log(`swayi3.js: splitting window ${window.get_id()}`);
+    }
+
+    setActiveContainer(containerId, workspace, monitor) {
+
     }
 }

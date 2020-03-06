@@ -235,6 +235,8 @@ class Extension {
         this.addKeyBinding("decrease-hsplit", (display) => this._tidal.decreaseHorizontalSplit(display));
         this.addKeyBinding("increase-vsplit", (display) => this._tidal.increaseVerticalSplit(display));
         this.addKeyBinding("decrease-vsplit", (display) => this._tidal.decreaseVerticalSplit(display));
+        this.addKeyBinding("vsplit-container", () => this._tidal.vsplitContainer());
+        this.addKeyBinding("hsplit-container", () => this._tidal.hsplitContainer());
 
         this.addKeyBinding("select-window-above", (display) => this._tidal.selectWindow({ above: true }));
         this.addKeyBinding("select-window-below", (display) => this._tidal.selectWindow({ below: true }));

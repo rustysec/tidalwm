@@ -28,7 +28,7 @@ var Tidal = class TidalClass {
             this.log.log(`tidal.js: unsupported tiling mode ${tilingMode}, using spiral`);
         }
 
-        this.pool = new this.poolType(this.settings, this.log);
+        this.pool = new this.poolType(this.settings, this.log, this.getActiveWindow);
         this.initWorkspace();
     }
 
@@ -106,6 +106,10 @@ var Tidal = class TidalClass {
         if (window.get_window_type() == 0) {
             let id = window.get_id();
             tidal.setWindowOpacities();
+
+            if (tidal.pool.setFocusedWindow) {
+                tidal.pool.setFocusedWindow(window);
+            }
         }
     }
 
@@ -411,5 +415,19 @@ var Tidal = class TidalClass {
         rect.width += xOffset * 2;
 
         return rect;
+    }
+
+    vsplitContainer() {
+        this.log.log(`tidal.js: vsplit container`);
+        if (this.pool.vsplitContainer) {
+            this.pool.vsplitContainer();
+        }
+    }
+
+    hsplitContainer() {
+        this.log.log(`tidal.js: hsplit container`);
+        if (this.pool.hsplitContainer) {
+            this.pool.hsplitContainer();
+        }
     }
 }

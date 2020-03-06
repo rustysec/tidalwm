@@ -85,6 +85,14 @@
             <default><![CDATA[['<Shift><Super>Down']]]></default>
             <description>Decreases the vertical split value of the focused window</description>
         </key>
+        <key name="vsplit-container" type="as">
+            <default><![CDATA[['<Super><Shift>Comma']]]></default>
+            <description>Vertically split the current container</description>
+        </key>
+        <key name="hsplit-container" type="as">
+            <default><![CDATA[['<Super><Shift>n']]]></default>
+            <description>Horizontally split the current container</description>
+        </key>
 
         <!-- movement -->
         <key name="select-window-right" type="as">
