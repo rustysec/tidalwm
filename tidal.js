@@ -40,7 +40,7 @@ var Tidal = class TidalClass {
             let id = window.get_id();
             let workspace = window.get_workspace().index();
             let monitor = window.get_monitor();
-            let isFloating = (this.windows[id] && this.windows[id].floating) || !window.allows_resize();
+            let isFloating = (this.windows[id] && this.windows[id].floating) || !window.can_maximize();
 
             let alwaysFloat = this.settings.get_strv("always-float")[0].split(",");
             let wmClass = window.get_wm_class();
