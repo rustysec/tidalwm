@@ -31,6 +31,18 @@ class ActiveHighlight {
                 this._window.disconnect(this._windowPositionSignal);
             }
 
+            let actor = w.get_compositor_private();
+            let parent = actor.get_parent();
+
+            parent.add_child(this._highlightTop);
+            parent.set_child_below_sibling(this._highlightTop, actor);
+            parent.add_child(this._highlightBottom);
+            parent.set_child_below_sibling(this._highlightBottom, actor);
+            parent.add_child(this._highlightLeft);
+            parent.set_child_below_sibling(this._highlightLeft, actor);
+            parent.add_child(this._highlightRight);
+            parent.set_child_below_sibling(this._highlightRight, actor);
+
             this._window = w;
             this._windowSignalSizeChanged = this._window.connect("size-changed", (w) => this.windowShown(this, w));
             this._windowSignalPositionChanged = this._window.connect("position-changed", (w) => this.windowShown(this, w));
