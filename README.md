@@ -10,7 +10,7 @@ Currently only "spiral" tiling is supported, but i3/sway and binary splitting ar
 options in development.
 
 #### Spiral
-![Spiral Example](https://i.imgur.com/i99CRxU.gif)
+![Spiral Example](https://i.imgur.com/W46QTaY.gif)
 
 ## Installing
 Clone this repo:
