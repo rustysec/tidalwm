@@ -4,7 +4,8 @@
     "description": "Sane Gnome tiling window manager",
     "uuid": "tidalwm@rustysec.github.io",
     "shell-version": [
-        "3.34"
+        "3.34",
+        "3.36"
     ],
     "version": 2,
     "url": "https://github.com/rustysec/tidalwm",
