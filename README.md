@@ -65,6 +65,7 @@ of life settings to make it more pleasant to use.
 |`Active Border Left`|Draw the border along the left of the window|
 |`Border Width`|Width of the border to draw around window|
 |`Border Color`|Can be any valid CSS color, ex: `#00ff00`, `rgba(100, 100, 100, 0.5)`|
+|`Always Float`|List of wm classes to exempt from tiling, ex: gnome-calculator,gnome-tweaks|
 
 #### Tiling
 |Setting|Description|
@@ -79,14 +80,15 @@ of life settings to make it more pleasant to use.
 |-------|-----------|
 |`Float Window`|Floats the focused window, ex: `<Ctrl><Alt>f`|
 |`Rotate Windows`|Automatically rotate windows through the tiling order, ex: `<Ctrl><Alt>r`|
-|`Increase Vertical Split`|Increase the hight of the current window, ex: `<Shift><Super>Up`|
-|`Decrease Vertical Split`|Decrease the hight of the current window, ex: `<Shift><Super><Alt>Down`|
 |`Increase Horizontal Split`|Increase the width of the current window, ex: `<Shift><Super>Right`|
 |`Decrease Horizontal Split`|Decrease the width of the current window, ex: `<Shift><Super>Left`|
-|`Select Window To Left`|Focuses the window directly to the left of the current, ex: `<Super>h,<Super>Left`|
-|`Select Window To Right`|Focuses the window directly to the right of the current, ex: `<Super>h,<Super>Left`|
-|`Select Window To Above`|Focuses the window directly above the current, ex: `<Super>h,<Super>Left`|
-|`Select Window To Below`|Focuses the window directly below the current, ex: `<Super>h,<Super>Left`|
+|`Increase Vertical Split`|Increase the height of the current window, ex: `<Shift><Super>Up`|
+|`Decrease Vertical Split`|Decrease the height of the current window, ex: `<Shift><Super><Alt>Down`|
+|`Select Window To Above`|Focuses the window directly above the current, ex: `<Super>k,<Super>Up`|
+|`Select Window To Below`|Focuses the window directly below the current, ex: `<Super>j,<Super>Down`|
+|`Select Window To Left`|Focuses the window directly to the left of the current window, ex: `<Super>h,<Super>Left`|
+|`Select Window To Right`|Focuses the window directly to the right of the current, ex: `<Super>l,<Super>Right`|
+
 
 ## FAQ
 ### Why is this a thing?
