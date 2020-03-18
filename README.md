@@ -10,7 +10,7 @@ Currently only "spiral" tiling is supported, but i3/sway and binary splitting ar
 options in development.
 
 #### Spiral
-![Spiral Example](https://i.imgur.com/i99CRxU.gif)
+![Spiral Example](https://i.imgur.com/W46QTaY.gif)
 
 ## Installing
 Clone this repo:
@@ -27,8 +27,9 @@ gnome-shell-extension-prefs
 ```
 Some notes about compatibility:
 - `gnome-terminal` doesn't behave well, try using alternatives like
-[kitty](https://sw.kovidgoyal.net/kitty/) or
-[alacritty](https://github.com/alacritty/alacritty)
+[kitty](https://sw.kovidgoyal.net/kitty/),
+[alacritty](https://github.com/alacritty/alacritty), or
+[termite](https://github.com/thestinger/termite)
 
 ## Current Features
 * Automatic spiral tiling
@@ -98,7 +99,7 @@ Xorg just doesn't work well for me. However, there's some software (i'm looking 
 zoom) that doesn't work (well) on wayland outside of gnome. Switching back and forth between
 two environments is a pain, so this became a fun little side project to solve my needs.
 
-##### Why not use PaperWM/Gnomesome/Tiling-Gnome/Gtile/etc?
+##### Why not use Pop-Shell/PaperWM/Gnomesome/Tiling-Gnome/Gtile/etc?
 In short: I have used those, and I just wanted something slightly different. All of these
 projects are great and have pretty active developers and user bases. But they either lack
 features (like gaps or auto tiling) that I want, or they add too much to the gnome workflow

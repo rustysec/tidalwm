@@ -43,7 +43,7 @@ var Tidal = class TidalClass {
             let id = window.get_id();
             let workspace = window.get_workspace().index();
             let monitor = window.get_monitor();
-            let isFloating = this.windows[id] && this.windows[id].floating;
+            let isFloating = (this.windows[id] && this.windows[id].floating) || !window.can_maximize();
 
             let alwaysFloat = this.settings.get_strv("always-float")[0].split(",");
             let wmClass = window.get_wm_class();
@@ -102,9 +102,9 @@ var Tidal = class TidalClass {
 
     // handle window focus events
     windowFocusChanged(tidal, window) {
-        tidal.log.debug(`tidal.js: window focus changed to ${window.get_id()}`);
+        let id = window.get_id();
+        tidal.log.debug(`tidal.js: window focus changed to ${id}`);
         if (window.get_window_type() == 0) {
-            let id = window.get_id();
             tidal.setWindowOpacities();
 
             if (tidal.pool.setFocusedWindow) {
