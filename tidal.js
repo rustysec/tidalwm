@@ -22,7 +22,8 @@ var Tidal = class TidalClass {
         if (tilingMode == 0) {
             this.poolType = Spiral;
         } else {
-            log.log.log(`tidal.js: unsupported tiling mode ${tilingMode}, using spiral`);
+            this.log.log(`tidal.js: unsupported tiling mode ${tilingMode}, using spiral`);
+            this.poolType = Spiral;
         }
 
         this.pool = new this.poolType(this.settings, this.log);
