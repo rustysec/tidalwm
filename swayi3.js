@@ -35,7 +35,7 @@ class Container {
         if (this.window) {
             log(`swayi3.js: this is a window container`);
             return {
-                workspace: this.window().get_workspace().index(),
+                workspace: this.window.get_workspace().index(),
                 monitor: this.window.get_monitor()
             }
         } else {
@@ -68,8 +68,12 @@ var Swayi3 = class Swayi3Class {
         let workspace = window.get_workspace().index();
         let monitor = window.get_monitor();
 
-        let container = this.getRootContainer(workspace, monitor) ||
-            new Container(window);
+        let container = this.getRootContainer(workspace, monitor);
+
+        if (!container) {
+            container = new Container(window);
+            this.containers.push(container);
+        }
 
         this.execute(workspace, monitor);
     }
@@ -142,12 +146,19 @@ var Swayi3 = class Swayi3Class {
 
         this.log.debug(`swayi3.js: executing on ${workspace}, ${monitor}`);
 
+        if (!root) {
+            root = new Container();
+        }
+
         root.mapInto(workArea, gaps, smartGaps);
     }
 
     getRootContainer(ws, mon) {
+        log(`get root container ws = ${ws}, mon = ${mon}`);
+
         return this.containers.filter(container => {
             let {workspace, monitor} = container.workspaceAndMonitor();
+            log(`checking a container workspace = ${workspace}, monitor = ${monitor} ...`);
             return workspace === ws && monitor === mon;
         })[0] || null;
     }
