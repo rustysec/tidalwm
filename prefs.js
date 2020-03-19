@@ -598,6 +598,43 @@ function hotkeysWidget() {
     });
     row += 1;
 
+    label = new Gtk.Label({
+        label: 'V Split Current Container:',
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    widget.attach(label, 0, row, 1, 1);
+
+    let vsplitCurrentEntry = new Gtk.Entry({
+        visible: true
+    });
+    vsplitCurrentEntry.set_text(this.settings.get_strv("vsplit-container").join(","));
+    widget.attach(vsplitCurrentEntry, 1, row, 1, 1);
+    vsplitCurrentEntry.connect('changed', () => {
+        this.settings.set_strv("vsplit-container", vsplitCurrentEntry.get_text().split(","))
+        this.settings.apply();
+    });
+    row += 1;
+
+    label = new Gtk.Label({
+        label: 'H Split Current Container:',
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    widget.attach(label, 0, row, 1, 1);
+
+    let hsplitCurrentEntry = new Gtk.Entry({
+        visible: true
+    });
+    hsplitCurrentEntry.set_text(this.settings.get_strv("hsplit-container").join(","));
+    widget.attach(hsplitCurrentEntry, 1, row, 1, 1);
+    hsplitCurrentEntry.connect('changed', () => {
+        this.settings.set_strv("hsplit-container", hsplitCurrentEntry.get_text().split(","))
+        this.settings.apply();
+    });
+    row += 1;
+
+
     // Return our widget which will be added to the window
     return widget;
 }

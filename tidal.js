@@ -106,11 +106,9 @@ var Tidal = class TidalClass {
         let id = window.get_id();
         tidal.log.debug(`tidal.js: window focus changed to ${id} type ${window.get_window_type()}`);
         if (window.get_window_type() === 0) {
-            tidal.log.log(`window type 0?`);
             tidal.setWindowOpacities();
 
             if (tidal.pool.setFocusedWindow) {
-                log(`can focus!`);
                 tidal.pool.setFocusedWindow(window);
             }
         }

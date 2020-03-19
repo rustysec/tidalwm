@@ -8,8 +8,10 @@ const CONTAINER = 1;
 
 class Container {
     constructor(window, isRoot) {
-        log(`swayi3.js: creating new container for ${window.get_id()}`);
-        this.window = window;
+        if (window) {
+            log(`swayi3.js: creating new container for ${window.get_id()}`);
+            this.window = window;
+        }
         this.children = [];
         this.direction = HORIZONTAL;
         this.root = isRoot || false;
@@ -24,9 +26,7 @@ class Container {
 
     addWindow(window, active) {
         if (!active) {
-            log(`no active window?`);
             if (this.window) {
-                log(`was window, now making a new container`);
                 this.children.push(new Container(this.window));
                 this.window = null;
             }
@@ -34,22 +34,17 @@ class Container {
             return true;
         } else {
             if (this.window) {
-                log(`looking in a windowed container ${this.window.get_id()} vs ${active.get_id()}?`);
                 if (this.window.get_id() === active.get_id()) {
-                    log(`found it here, in the windowed container!`);
                     this.children.push(new Container(this.window));
                     this.children.push(new Container(window));
                     this.window = null;
                     return true;
                 } else {
-                    log(`they didn't match`);
                     return false;
                 }
             } else {
-                log(`looking in a container container`);
                 // check all the children to see if they are windows, match active if possible
                 for (var i = 0; i < this.children.length; i++) {
-                    log(`checking child ${i}`);
                     if (this.children[i].window && this.children[i].window.get_id() === active.get_id()) {
                         this.children.push(new Container(window));
                         return true;
@@ -57,7 +52,6 @@ class Container {
                 }
                 // otherwise, we need to traverse the tree
                 for (var i = 0; i < this.children.length; i++) {
-                    log(`try to force add to child ${i}`);
                     if (this.children[i].addWindow(window, active)) {
                         return true;
                     }
@@ -69,6 +63,7 @@ class Container {
     }
 
     workspaceAndMonitor() {
+        log(`workspaceAndMonitor()`);
         if (this.window && this.window.get_workspace() !== null) {
             log(`swayi3.js: this is a window container`);
             return {
@@ -82,6 +77,7 @@ class Container {
                     return result;
                 }
             }
+            return null;
         }
     }
 
@@ -138,9 +134,7 @@ class Container {
     prune() {
         log(`pruning`);
         if (this.window) {
-            log(`found a window? ${this.window.get_workspace()}`);
             if (this.window.get_workspace() === null) {
-                log(`found a dead one`);
                 this.window = null;
                 return true;
             } else {
@@ -152,10 +146,8 @@ class Container {
             }
 
             this.children = this.children.filter(child => child.window || child.children.length);
-            log(`now have ${this.children.length} children`);
 
-            if (this.children.length === 1) {
-                log(`setting myself as a window container now`);
+            if (this.children.length === 1 && this.children[0].window) {
                 this.window = this.children[0].window;
                 this.children = [];
             }
@@ -165,14 +157,12 @@ class Container {
     setDirectionForContainerOf(window, direction) {
         if (this.window) {
             if (this.window.get_id() === window.get_id()) {
-                log(`found the active container for ${window.get_id()}`);
                 this.direction = direction;
                 return true;
             } else {
                 return false;
             }
         } else {
-            log(`checking my kids`);
             for (var i = 0; i < this.children.length; i++) {
                 if (this.children[i].window && this.children[i].window.get_id() === window.get_id()) {
                     this.children[i].direction = direction;
@@ -211,11 +201,9 @@ var Swayi3 = class Swayi3Class {
         let container = this.getRootContainer(workspace, monitor);
 
         if (!container) {
-            log(`have to create new container...`);
             container = new Container(window, true);
             this.containers.push(container);
         } else {
-            log(`adding to existing container`);
             container.addWindow(window, this.getActiveWindowFor(window));
         }
 
@@ -233,7 +221,9 @@ var Swayi3 = class Swayi3Class {
     }
 
     pruneContainers() {
+        log(`pruneContainers() staring with ${this.containers.length}`);
         this.containers = this.containers.filter(container => container.workspaceAndMonitor());
+        log(`pruneContainers() ended with ${this.containers.length}`);
     }
 
     removeWindow(window) {
@@ -247,6 +237,7 @@ var Swayi3 = class Swayi3Class {
                     root.prune();
                     this.execute(workspace, monitor);
                 }
+                delete this.windows[id];
             } else {
                 log(`can't find this window?`);
             }
@@ -317,13 +308,12 @@ var Swayi3 = class Swayi3Class {
     }
 
     getRootContainer(ws, mon) {
-        log(`get root container ws = ${ws}, mon = ${mon}`);
-
+        log(`getRootContainer(${ws}, ${mon})`);
         return this.containers.filter(container => {
             let wsAndMon = container.workspaceAndMonitor();
+            log(`found: ${JSON.stringify(wsAndMon)}`);
             if (wsAndMon) {
                 let {workspace, monitor} = wsAndMon;
-                log(`checking a container workspace = ${workspace}, monitor = ${monitor} ...`);
                 return workspace === ws && monitor === mon;
             } else {
                 return false;
