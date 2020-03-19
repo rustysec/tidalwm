@@ -8,11 +8,10 @@ const CONTAINER = 1;
 
 class Container {
     constructor(window, isRoot) {
-        log(`swayi3.js; creating new container for ${window.get_id()}`);
+        log(`swayi3.js: creating new container for ${window.get_id()}`);
         this.window = window;
         this.children = [];
         this.direction = HORIZONTAL;
-        this.active = true;
         this.root = isRoot || false;
     }
 
@@ -23,12 +22,50 @@ class Container {
         }
     }
 
-    addWindow(window) {
-        if (this.active && this.window) {
-            this.children.push(new Container(this.window));
-            this.window = null;
+    addWindow(window, active) {
+        if (!active) {
+            log(`no active window?`);
+            if (this.window) {
+                log(`was window, now making a new container`);
+                this.children.push(new Container(this.window));
+                this.window = null;
+            }
+            this.children.push(new Container(window));
+            return true;
+        } else {
+            if (this.window) {
+                log(`looking in a windowed container ${this.window.get_id()} vs ${active.get_id()}?`);
+                if (this.window.get_id() === active.get_id()) {
+                    log(`found it here, in the windowed container!`);
+                    this.children.push(new Container(this.window));
+                    this.children.push(new Container(window));
+                    this.window = null;
+                    return true;
+                } else {
+                    log(`they didn't match`);
+                    return false;
+                }
+            } else {
+                log(`looking in a container container`);
+                // check all the children to see if they are windows, match active if possible
+                for (var i = 0; i < this.children.length; i++) {
+                    log(`checking child ${i}`);
+                    if (this.children[i].window && this.children[i].window.get_id() === active.get_id()) {
+                        this.children.push(new Container(window));
+                        return true;
+                    }
+                }
+                // otherwise, we need to traverse the tree
+                for (var i = 0; i < this.children.length; i++) {
+                    log(`try to force add to child ${i}`);
+                    if (this.children[i].addWindow(window, active)) {
+                        return true;
+                    }
+                }
+                // if all else fails
+                return false;
+            }
         }
-        this.children.push(new Container(window));
     }
 
     workspaceAndMonitor() {
@@ -49,7 +86,6 @@ class Container {
     }
 
     mapInto(workArea, gaps, smartGaps) {
-        log(`mapInto()`);
         if (this.window) {
             if (this.root) {
                 this.window.move_resize_frame(true,
@@ -67,8 +103,6 @@ class Container {
                 );
             }
         } else {
-            log(`do the things!`);
-
             workArea.height -= gaps * 2;
             workArea.width -= gaps * 2;
             workArea.x += gaps;
@@ -125,6 +159,35 @@ class Container {
             }
         }
     }
+
+    setDirectionForContainerOf(window, direction) {
+        if (this.window) {
+            if (this.window.get_id() === window.get_id()) {
+                log(`found the active container for ${window.get_id()}`);
+                this.direction = direction;
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            log(`checking my kids`);
+            for (var i = 0; i < this.children.length; i++) {
+                if (this.children[i].window && this.children[i].window.get_id() === window.get_id()) {
+                    this.children[i].direction = direction;
+                    this.children[i].children.push(new Container(this.children[i].window));
+                    this.children[i].window = null;
+                    return true;
+                }
+            }
+        }
+       
+        // last ditch effort
+        for (var i=0; i < this.children.length; i++) {
+            if (this.children[i].setDirectionForContainerOf(window, direction)) {
+                return true;
+            }
+        }
+    }
 }
 
 var Swayi3 = class Swayi3Class {
@@ -133,6 +196,7 @@ var Swayi3 = class Swayi3Class {
         this.log = logging;
         this.containers = [];
         this.windows = {};
+        this.activeWindows = [];
         this.getActiveWindow = getActiveWindow;
     }
 
@@ -150,7 +214,7 @@ var Swayi3 = class Swayi3Class {
             this.containers.push(container);
         } else {
             log(`adding to existing container`);
-            container.addWindow(window);
+            container.addWindow(window, this.getActiveWindowFor(window));
         }
 
         this.windows[window.get_id()] = {
@@ -158,10 +222,16 @@ var Swayi3 = class Swayi3Class {
             workspace: window.get_workspace().index()
         };
 
+        this.cacheActiveWindow(window);
+
         this.execute(workspace, monitor);
     }
 
     getNextContainerId() {
+    }
+
+    pruneContainers() {
+        this.containers = this.containers.filter(container => container.workspaceAndMonitor());
     }
 
     removeWindow(window) {
@@ -178,6 +248,7 @@ var Swayi3 = class Swayi3Class {
             } else {
                 log(`can't find this window?`);
             }
+            this.pruneContainers();
         }
     }
 
@@ -261,13 +332,25 @@ var Swayi3 = class Swayi3Class {
     vsplitContainer() {
         this.log.log(`swayi3.js: vsplitContainer()`);
         let window = this.getActiveWindow();
+        this.cacheActiveWindow(window);
         this.log.log(`swayi3.js: active window is ${window.get_id()}`);
+        let root = this.getRootContainer(window.get_workspace().index(), window.get_monitor());
+        if (root) {
+            root.setDirectionForContainerOf(window, VERTICAL);
+        }
+        this.execute(window.get_workspace().index(), window.get_monitor());
     }
 
     hsplitContainer() {
         this.log.log(`swayi3.js: hsplitContainer()`);
         let window = this.getActiveWindow();
+        this.cacheActiveWindow(window);
         this.log.log(`swayi3.js: active window is ${window.get_id()}`);
+        let root = this.getRootContainer(window.get_workspace().index(), window.get_monitor());
+        if (root) {
+            root.setDirectionForContainerOf(window, HORIZONTAL);
+        }
+        this.execute(window.get_workspace().index(), window.get_monitor());
     }
 
     splitWindow(window, direction) {
@@ -279,5 +362,40 @@ var Swayi3 = class Swayi3Class {
 
     setActiveContainer(containerId, workspace, monitor) {
 
+    }
+
+    setFocusedWindow(window) {
+        log(`swayi3.js: focus changed`);
+        this.cacheActiveWindow(window);
+    }
+
+    cacheActiveWindow(active) {
+        this.activeWindows = this.activeWindows.filter(window => {
+            if (window && window.get_workspace() !== null) {
+                return window.get_monitor() !== active.get_monitor() &&
+                    window.get_workspace().index() !== active.get_workspace().index();
+            } else {
+                return false;
+            }
+        });
+        this.activeWindows.push(active);
+    }
+
+    getActiveWindowFor(window) {
+        let active = this.activeWindows.filter(active => {
+            if (active && active.get_workspace() !== null) {
+                return active.get_monitor() === window.get_monitor() &&
+                    active.get_workspace().index() ===
+                    window.get_workspace().index();
+            } else {
+                return false;
+            }
+        });
+
+        if (active) {
+            return active[0];
+        } else {
+            return null;
+        }
     }
 }

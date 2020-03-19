@@ -26,6 +26,7 @@ var Tidal = class TidalClass {
             this.poolType = Swayi3;
         } else {
             this.log.log(`tidal.js: unsupported tiling mode ${tilingMode}, using spiral`);
+            this.poolType = Spiral;
         }
 
         this.pool = new this.poolType(this.settings, this.log, this.getActiveWindow);
@@ -50,7 +51,7 @@ var Tidal = class TidalClass {
             let windowTitle = window.get_title();
             let floating = isFloating
                 || alwaysFloat.includes(wmClass)
-                || alwaysFloat.includes(windowTitle);
+                || alwaysFloat.includes(windowTitle) && windowTitle;
 
             let tidal = this;
             window.connect("focus", (window) => this.windowFocusChanged(tidal, window));
@@ -103,11 +104,13 @@ var Tidal = class TidalClass {
     // handle window focus events
     windowFocusChanged(tidal, window) {
         let id = window.get_id();
-        tidal.log.debug(`tidal.js: window focus changed to ${id}`);
-        if (window.get_window_type() == 0) {
+        tidal.log.debug(`tidal.js: window focus changed to ${id} type ${window.get_window_type()}`);
+        if (window.get_window_type() === 0) {
+            tidal.log.log(`window type 0?`);
             tidal.setWindowOpacities();
 
             if (tidal.pool.setFocusedWindow) {
+                log(`can focus!`);
                 tidal.pool.setFocusedWindow(window);
             }
         }
