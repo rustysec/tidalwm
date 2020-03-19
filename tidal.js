@@ -20,9 +20,10 @@ var Tidal = class TidalClass {
         this.activeHighlight = new ActiveHighlight(settings);
 
         let tilingMode = this.settings.get_int("tile-mode");
-        if (tilingMode == 0) {
+        this.log.log(`tidal.js: detected tiling mode ${tilingMode}`);
+        if (tilingMode === 0) {
             this.poolType = Spiral;
-        } else if (tilingMode == 1) {
+        } else if (tilingMode === 1) {
             this.poolType = Swayi3;
         } else {
             this.log.log(`tidal.js: unsupported tiling mode ${tilingMode}, using spiral`);
