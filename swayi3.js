@@ -103,10 +103,12 @@ class Container {
                 );
             }
         } else {
-            workArea.height -= gaps * 2;
-            workArea.width -= gaps * 2;
-            workArea.x += gaps;
-            workArea.y += gaps;
+            if (this.root || (!this.children.some(child => child.window || child.children.length === 1))) {
+                workArea.height -= gaps * 2;
+                workArea.width -= gaps * 2;
+                workArea.x += gaps;
+                workArea.y += gaps;
+            }
 
             let width = this.direction === HORIZONTAL ? (workArea.width - (gaps * (this.children.length - 1))) / this.children.length : workArea.width;
             let height = this.direction === VERTICAL ? (workArea.height - (gaps * (this.children.length - 1))) / this.children.length : workArea.height;
