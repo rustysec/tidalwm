@@ -6,6 +6,23 @@ const VERTICAL = 1;
 const WINDOW = 0;
 const CONTAINER = 1;
 
+const Mainloop = imports.mainloop;
+
+const setTimeout = function(func, millis /* , ... args */) {
+
+    let args = [];
+    if (arguments.length > 2) {
+        args = args.slice.call(arguments, 2);
+    }
+ 
+    let id = Mainloop.timeout_add(millis, () => {
+        func.apply(null, args);
+        return false; // Stop repeating
+    }, null);
+
+    return id;
+};
+
 class Container {
     constructor(window, isRoot) {
         if (window) {
@@ -15,13 +32,6 @@ class Container {
         this.children = [];
         this.direction = HORIZONTAL;
         this.root = isRoot || false;
-    }
-
-    refresh() {
-        if (this._window && this._window.get_workspace()) {
-            this._monitor = this._window.get_monitor();
-            this._workspace = this._window.get_workspace() && window.get_workspace().index();
-        }
     }
 
     addWindow(window, active) {
@@ -83,21 +93,28 @@ class Container {
 
     mapInto(workArea, gaps, smartGaps) {
         if (this.window) {
+            log(`found a thing with ${this.window.get_id()}`);
+
+            let newSize = {};
+
             if (this.root) {
-                this.window.move_resize_frame(true,
-                    workArea.x + gaps,
-                    workArea.y + gaps,
-                    workArea.width - (gaps * 2),
-                    workArea.height - (gaps * 2),
-                );
+                newSize.x = workArea.x + gaps;
+                newSize.y = workArea.y + gaps;
+                newSize.width = workArea.width - (gaps * 2);
+                newSize.height = workArea.height - (gaps * 2);
             } else {
-                this.window.move_resize_frame(true,
-                    workArea.x,
-                    workArea.y,
-                    workArea.width,
-                    workArea.height
-                );
+                newSize.x = workArea.x;
+                newSize.y = workArea.y;
+                newSize.width = workArea.width;
+                newSize.height = workArea.height
             }
+
+            this.window.move_resize_frame(true,
+                newSize.x,
+                newSize.y,
+                newSize.width,
+                newSize.height
+            );
         } else {
             if (this.root || (!this.children.some(child => child.window || child.children.length === 1))) {
                 workArea.height -= gaps * 2;
@@ -195,6 +212,10 @@ var Swayi3 = class Swayi3Class {
     addWindow(window) {
         log(`swayi3.js: add window ${window.get_id()}`);
 
+        if (window.get_maximized()) {
+            window.unmaximize(Meta.MaximizeFlags.BOTH);
+        }
+
         let workspace = window.get_workspace().index();
         let monitor = window.get_monitor();
 
@@ -212,9 +233,10 @@ var Swayi3 = class Swayi3Class {
             workspace: window.get_workspace().index()
         };
 
-        this.cacheActiveWindow(window);
 
         this.execute(workspace, monitor);
+
+        this.cacheActiveWindow(window);
     }
 
     getNextContainerId() {
@@ -259,6 +281,9 @@ var Swayi3 = class Swayi3Class {
 
     dragWindow(window) {
         // todo
+        if (window && window.get_workspace()) {
+            this.execute(window.get_workspace().index(), window.get_monitor());
+        }
     }
 
     rotateWindows() {
@@ -345,17 +370,6 @@ var Swayi3 = class Swayi3Class {
         this.execute(window.get_workspace().index(), window.get_monitor());
     }
 
-    splitWindow(window, direction) {
-        if (!window && !this.windows[window.get_id()])
-            return;
-
-        this.log.log(`swayi3.js: splitting window ${window.get_id()}`);
-    }
-
-    setActiveContainer(containerId, workspace, monitor) {
-
-    }
-
     setFocusedWindow(window) {
         log(`swayi3.js: focus changed`);
         this.cacheActiveWindow(window);
@@ -374,8 +388,10 @@ var Swayi3 = class Swayi3Class {
     }
 
     getActiveWindowFor(window) {
+        log(`getActiveWindowFor`);
         let active = this.activeWindows.filter(active => {
-            if (active && active.get_workspace() !== null) {
+            let workspace = active.get_workspace();
+            if (active && workspace !== null && workspace !== undefined) {
                 return active.get_monitor() === window.get_monitor() &&
                     active.get_workspace().index() ===
                     window.get_workspace().index();
@@ -384,9 +400,11 @@ var Swayi3 = class Swayi3Class {
             }
         });
 
-        if (active) {
+        if (active && active[0]) {
+            log(`-> found one`);
             return active[0];
         } else {
+            log(`-> didn't find one`);
             return null;
         }
     }
