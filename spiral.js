@@ -122,7 +122,7 @@ var Spiral = class SpiralClass {
             return;
         }
 
-        let smartGaps = this.settings.get_boolean("smart-gaps");
+        let smartGaps = this.settings.get_boolean("smart-gaps") || !Object.values(this.windows).length;
 
         let gaps = (smartGaps && this.windows.length == 1) ? 0 :
             this.settings.get_int("window-gaps") *
@@ -133,16 +133,18 @@ var Spiral = class SpiralClass {
         let ws = global.workspace_manager.get_workspace_by_index(workspace);
         let work_area = ws.get_work_area_for_monitor(monitor);
 
-        work_area.x = work_area.x + gaps;
-        work_area.y = work_area.y + gaps;
-        work_area.width = work_area.width - (gaps * 2);
-        work_area.height = work_area.height - (gaps * 2);
-
         let direction = this.settings.get_int("initial-direction");
 
         this.cacheWindows();
         let windows = this.getSortedWindows(workspace, monitor);
         this.log.debug(`spiral.js: executing on ${workspace}, ${monitor} with ${windows.length} windows`);
+
+        if (!smartGaps || windows.length > 1) {
+            work_area.x = work_area.x + gaps;
+            work_area.y = work_area.y + gaps;
+            work_area.width = work_area.width - (gaps * 2);
+            work_area.height = work_area.height - (gaps * 2);
+        }
 
         for (var i = 0; i < windows.length; i++) {
             windows[i].window.unmaximize(Meta.MaximizeFlags.BOTH);

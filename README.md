@@ -26,10 +26,17 @@ Activate with:
 gnome-shell-extension-prefs
 ```
 Some notes about compatibility:
-- `gnome-terminal` doesn't behave well, try using alternatives like
+* `gnome-terminal` doesn't behave well, try using alternatives like
 [kitty](https://sw.kovidgoyal.net/kitty/),
 [alacritty](https://github.com/alacritty/alacritty), or
 [termite](https://github.com/thestinger/termite)
+* By default TidalWM is configured to use a number of shortcuts that conflict with Gnome defaults, these should be changed or disabled:
+    * `Super+L` - Default for "lock the screen"
+    * `Super+H` - Default for "hide current window"
+    * `Super+Left` - Default for "view split on left"
+    * `Super+Right` - Default for "view split on right"
+    * `Super+Up` - Default for "maximize window"
+    * `Super+Down` - Default for "un-maximize window"
 
 ## Current Features
 * Automatic spiral tiling
