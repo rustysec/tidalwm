@@ -386,7 +386,11 @@ var Tidal = class TidalClass {
 
         active.get_workspace().list_windows().forEach(window => {
             if (window !== active) {
-                let other = this.getWindowRectForMove(window);
+                let other = this.getWindowRectForMove(
+                    window,
+                    direction.above || direction.below,
+                    direction.left || direction.right
+                );
 
                 if (rect.overlap(other)) {
                     this.log.debug(`${active.get_id()} has a neighbor ${window.get_id()}`);
@@ -396,7 +400,7 @@ var Tidal = class TidalClass {
         });
     }
 
-    getWindowRectForMove(window) {
+    getWindowRectForMove(window, adjustVertical, adjustHorizontal) {
         let monitor = window.get_monitor();
         let workspace = window.get_workspace();
         let scale = window.get_display().get_monitor_scale(window.get_monitor());
@@ -406,9 +410,9 @@ var Tidal = class TidalClass {
 
         let rect = window.get_frame_rect();
 
-        let yOffset = (monitorGeometry.height - workArea.height);
+        let yOffset = adjustVertical ? (monitorGeometry.height - workArea.height) : 0;
 
-        let xOffset = (monitorGeometry.width - workArea.width);
+        let xOffset = adjustHorizontal ? (monitorGeometry.width - workArea.width) : 0;
 
         rect.y -= yOffset;
         rect.height += yOffset * 2;
