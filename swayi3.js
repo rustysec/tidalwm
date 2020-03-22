@@ -237,9 +237,11 @@ var Swayi3 = class Swayi3Class {
         this.execute(workspace, monitor);
 
         this.cacheActiveWindow(window);
-    }
 
-    getNextContainerId() {
+        // this is more or less a hack at the moment
+        setTimeout(() => {
+            this.execute(workspace, monitor);
+        }, 200);
     }
 
     pruneContainers() {
@@ -353,7 +355,7 @@ var Swayi3 = class Swayi3Class {
         this.log.log(`swayi3.js: active window is ${window.get_id()}`);
         let root = this.getRootContainer(window.get_workspace().index(), window.get_monitor());
         if (root) {
-            root.setDirectionForContainerOf(window, VERTICAL);
+            root.setDirectionForContainerOf(window, HORIZONTAL);
         }
         this.execute(window.get_workspace().index(), window.get_monitor());
     }
@@ -365,7 +367,7 @@ var Swayi3 = class Swayi3Class {
         this.log.log(`swayi3.js: active window is ${window.get_id()}`);
         let root = this.getRootContainer(window.get_workspace().index(), window.get_monitor());
         if (root) {
-            root.setDirectionForContainerOf(window, HORIZONTAL);
+            root.setDirectionForContainerOf(window, VERTICAL);
         }
         this.execute(window.get_workspace().index(), window.get_monitor());
     }

@@ -42,6 +42,7 @@ class ActiveHighlight {
             parent.set_child_below_sibling(this._highlightLeft, actor);
             parent.add_child(this._highlightRight);
             parent.set_child_below_sibling(this._highlightRight, actor);
+            parent.set_child_above_sibling(actor, null);
 
             this._window = w;
             this._windowSignalSizeChanged = this._window.connect("size-changed", (w) => this.windowShown(this, w));
