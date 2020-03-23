@@ -168,9 +168,12 @@ class Extension {
         displaySignals.push(
             global.display.connect(
                 "window-entered-monitor", (display, number, window) => {
-                    this.log.verbose(`extension.js: window ${window.get_id()} entered monitor ${number} on workspace ${window.get_workspace().index()}`);
-                    if (window.get_window_type() == 0) {
-                        //this._tidal.windowEnteredMonitor(window, number);
+                    let workspace = window.get_workspace();
+                    if (workspace) {
+                        this.log.verbose(`extension.js: window ${window.get_id()} entered monitor ${number} on workspace ${workspace.index()}`);
+                        if (window.get_window_type() == 0) {
+                            //this._tidal.windowEnteredMonitor(window, number);
+                        }
                     }
                 }
             )
