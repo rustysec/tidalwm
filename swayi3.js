@@ -192,6 +192,23 @@ class Container {
             }
         }
     }
+
+    getContainerFor(window) {
+        if (this.window) {
+            if (this.window === window) {
+                return this;
+            } else {
+                return false;
+            }
+        } else {
+            for (var i = 0; i < this.children.length; i++) {
+                if (this.children[i].getContainerFor(window)) {
+                    return this.children[i];
+                }
+            }
+            return false;
+        }
+    }
 }
 
 var Swayi3 = class Swayi3Class {
@@ -273,10 +290,59 @@ var Swayi3 = class Swayi3Class {
     }
 
     dragWindow(window) {
-        // todo
+        if (!window || window.get_workspace() === null) {
+            return;
+        }
+        /*
         if (window && window.get_workspace()) {
             this.execute(window.get_workspace().index(), window.get_monitor());
         }
+        */
+
+        let workspace = window.get_workspace();
+        let [x, y, z] = global.get_pointer();
+
+        let rect = new Meta.Rectangle({
+            x, y,
+            width: 1,
+            height: 1,
+        });
+
+        let draggingRoot = this.getRootContainer(
+            window.get_workspace().index(),
+            window.get_monitor()
+        );
+        if (!draggingRoot) {
+            this.execute(window.get_workspace().index(), window.get_monitor());
+            return;
+        }
+        let draggingContainer = draggingRoot.getContainerFor(window);
+        if (!draggingContainer) {
+            this.execute(window.get_workspace().index(), window.get_monitor());
+            return;
+        }
+
+        global.get_window_actors().forEach(actor => {
+            let meta = actor.get_meta_window();
+            if (meta.get_id() !== window.get_id()) {
+                if (meta.get_frame_rect().contains_rect(rect)) {
+                    let underRoot = this.getRootContainer(
+                        meta.get_workspace().index(),
+                        meta.get_monitor()
+                    );
+                    if (underRoot) {
+                        let underContainer = underRoot.getContainerFor(meta);
+                        if (underContainer) {
+                            let tempWindow = draggingContainer.window;
+                            draggingContainer.window = underContainer.window;
+                            underContainer.window = tempWindow;
+                            this.execute(meta.get_workspace().index(), meta.get_monitor());
+                        }
+                    }
+                }
+            }
+        });
+        this.execute(window.get_workspace().index(), window.get_monitor());
     }
 
     rotateWindows() {
