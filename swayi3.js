@@ -26,7 +26,7 @@ const setTimeout = function(func, millis /* , ... args */) {
 class Container {
     constructor(window, isRoot) {
         if (window) {
-            this.log.debug(`swayi3.js: creating new container for ${window.get_id()}`);
+            log(`swayi3.js: creating new container for ${window.get_id()}`);
             this.window = window;
         }
         this.children = [];
