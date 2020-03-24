@@ -26,7 +26,7 @@ const setTimeout = function(func, millis /* , ... args */) {
 class Container {
     constructor(window, isRoot) {
         if (window) {
-            log(`swayi3.js: creating new container for ${window.get_id()}`);
+            this.log.debug(`swayi3.js: creating new container for ${window.get_id()}`);
             this.window = window;
         }
         this.children = [];
@@ -73,9 +73,7 @@ class Container {
     }
 
     workspaceAndMonitor() {
-        log(`workspaceAndMonitor()`);
         if (this.window && this.window.get_workspace() !== null) {
-            log(`swayi3.js: this is a window container`);
             return {
                 workspace: this.window.get_workspace().index(),
                 monitor: this.window.get_monitor()
@@ -93,8 +91,6 @@ class Container {
 
     mapInto(workArea, gaps, smartGaps) {
         if (this.window) {
-            log(`found a thing with ${this.window.get_id()}`);
-
             let newSize = {};
 
             if (this.root) {
@@ -149,7 +145,6 @@ class Container {
     }
 
     prune() {
-        log(`pruning`);
         if (this.window) {
             if (this.window.get_workspace() === null) {
                 this.window = null;
@@ -210,7 +205,7 @@ var Swayi3 = class Swayi3Class {
     }
 
     addWindow(window) {
-        log(`swayi3.js: add window ${window.get_id()}`);
+        this.log.debug(`swayi3.js: add window ${window.get_id()}`);
 
         if (window.get_maximized()) {
             window.unmaximize(Meta.MaximizeFlags.BOTH);
@@ -245,15 +240,12 @@ var Swayi3 = class Swayi3Class {
     }
 
     pruneContainers() {
-        log(`pruneContainers() staring with ${this.containers.length}`);
         this.containers = this.containers.filter(container => container.workspaceAndMonitor());
-        log(`pruneContainers() ended with ${this.containers.length}`);
     }
 
     removeWindow(window) {
         if (window) {
             let id = window.get_id();
-            this.log.log(`removing window: ${id}`);
             if (this.windows[id]) {
                 let { monitor, workspace } = this.windows[id];
                 let root = this.getRootContainer(monitor, workspace);
@@ -262,9 +254,7 @@ var Swayi3 = class Swayi3Class {
                     this.execute(workspace, monitor);
                 }
                 delete this.windows[id];
-            } else {
-                log(`can't find this window?`);
-            }
+            } 
             this.pruneContainers();
         }
     }
@@ -274,11 +264,12 @@ var Swayi3 = class Swayi3Class {
     }
 
     resetWindow(window) {
-        // todo
-    }
-
-    rotateWindows() {
-        // todo
+        if (window && window.get_workspace()) {
+            this.execute(
+                window.get_workspace().index(),
+                window.get_monitor()
+            );
+        }
     }
 
     dragWindow(window) {
@@ -313,7 +304,7 @@ var Swayi3 = class Swayi3Class {
     }
 
     execute(workspace, monitor) {
-        log(`swayi3.js: execute(${workspace}, ${monitor})`);
+        this.log.debug(`swayi3.js: execute(${workspace}, ${monitor})`);
         let root = this.getRootContainer(workspace, monitor);
         let smartGaps = this.settings.get_boolean("smart-gaps");
 
@@ -335,10 +326,8 @@ var Swayi3 = class Swayi3Class {
     }
 
     getRootContainer(ws, mon) {
-        log(`getRootContainer(${ws}, ${mon})`);
         return this.containers.filter(container => {
             let wsAndMon = container.workspaceAndMonitor();
-            log(`found: ${JSON.stringify(wsAndMon)}`);
             if (wsAndMon) {
                 let {workspace, monitor} = wsAndMon;
                 return workspace === ws && monitor === mon;
@@ -373,7 +362,7 @@ var Swayi3 = class Swayi3Class {
     }
 
     setFocusedWindow(window) {
-        log(`swayi3.js: focus changed`);
+        this.log.debug(`swayi3.js: focus changed`);
         this.cacheActiveWindow(window);
     }
 
@@ -390,7 +379,6 @@ var Swayi3 = class Swayi3Class {
     }
 
     getActiveWindowFor(window) {
-        log(`getActiveWindowFor`);
         let active = this.activeWindows.filter(active => {
             let workspace = active.get_workspace();
             if (active && workspace !== null && workspace !== undefined) {
@@ -403,10 +391,8 @@ var Swayi3 = class Swayi3Class {
         });
 
         if (active && active[0]) {
-            log(`-> found one`);
             return active[0];
         } else {
-            log(`-> didn't find one`);
             return null;
         }
     }
