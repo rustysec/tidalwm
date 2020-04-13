@@ -388,9 +388,18 @@ function tilingWidget() {
         visible: true
     });
     widget.attach(label, 0, row, 1, 1); 
+    let initial_direction = this.settings.get_int("initial-direction");
 
-    let radio_horizontal = new Gtk.RadioButton({label: 'Horizontal', visible: true});
-    let radio_vertical = new Gtk.RadioButton({label: 'Vertical', visible: true, group: radio_horizontal});
+    let radio_horizontal = new Gtk.RadioButton({
+        label: 'Horizontal',
+        visible: true,
+        active: initial_direction === 0}
+    );
+    let radio_vertical = new Gtk.RadioButton({
+        label: 'Vertical',
+        visible: true, group: radio_horizontal,
+        active: initial_direction === 1}
+    );
 
     radio_horizontal.connect('toggled', () => this.settings.set_int("initial-direction", 0));
     radio_vertical.connect('toggled', () => this.settings.set_int("initial-direction", 1));

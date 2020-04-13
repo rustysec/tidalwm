@@ -34,14 +34,18 @@ class ActiveHighlight {
             let actor = w.get_compositor_private();
             let parent = actor.get_parent();
 
-            parent.add_child(this._highlightTop);
-            parent.set_child_below_sibling(this._highlightTop, actor);
-            parent.add_child(this._highlightBottom);
-            parent.set_child_below_sibling(this._highlightBottom, actor);
-            parent.add_child(this._highlightLeft);
-            parent.set_child_below_sibling(this._highlightLeft, actor);
-            parent.add_child(this._highlightRight);
-            parent.set_child_below_sibling(this._highlightRight, actor);
+            if (actor && parent) {
+                /*
+                parent.add_child(this._highlightTop);
+                parent.set_child_below_sibling(this._highlightTop, actor);
+                parent.add_child(this._highlightBottom);
+                parent.set_child_below_sibling(this._highlightBottom, actor);
+                parent.add_child(this._highlightLeft);
+                parent.set_child_below_sibling(this._highlightLeft, actor);
+                parent.add_child(this._highlightRight);
+                parent.set_child_below_sibling(this._highlightRight, actor);
+                */
+            }
 
             this._window = w;
             this._windowSignalSizeChanged = this._window.connect("size-changed", (w) => this.windowShown(this, w));
@@ -101,7 +105,7 @@ class ActiveHighlight {
     }
 
     windowIsMaximized() {
-        if (this._window) {
+        if (this._window && this._window.get_workspace()) {
             let monitor = this._window.get_monitor();
             let workArea = this._window.get_workspace().get_work_area_for_monitor(monitor);
             let windowFrame = this._window.get_frame_rect();

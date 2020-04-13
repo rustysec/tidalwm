@@ -107,7 +107,12 @@ var Spiral = class SpiralClass {
 
     getSortedWindows(workspace, monitor) {
         return Object.values(this.windows)
-            .filter(item => item.workspace === workspace && item.monitor === monitor && !item.window.minimized && !item.window.is_fullscreen())
+            .filter(item =>
+                item.workspace === workspace &&
+                item.monitor === monitor &&
+                !item.window.minimized && 
+                !item.window.is_fullscreen()
+            )
             .sort((a, b) => {
                 if (a.order > b.order) return 1;
                 if (a.order < b.order) return -1;
@@ -189,8 +194,8 @@ var Spiral = class SpiralClass {
             // appearing in multi-dpi environments.
             let self = windows[i];
             let tmpResize = windows[i].window.connect("size-changed", (window) => {
-                self.window.disconnect(tmpResize);
-                self.window.move_resize_frame(true,
+                window.disconnect(tmpResize);
+                window.move_resize_frame(true,
                     self.lastSize.x,
                     self.lastSize.y,
                     self.lastSize.width,

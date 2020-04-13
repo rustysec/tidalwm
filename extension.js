@@ -227,7 +227,12 @@ class Extension {
 
         workspaceManagerSignals.push(
             global.workspace_manager.connect("active-workspace-changed", () => {
-                /// placeholder
+                this._tidal.refreshWorkspace();
+            })
+        );
+
+        workspaceManagerSignals.push(
+            global.workspace_manager.connect("workspace-switched", (object, p0, p1) => {
                 this._tidal.refreshWorkspace();
             })
         );
@@ -260,6 +265,7 @@ class Extension {
 
     directionChanged(data) {
         this.log.debug(`extension.js: initial direction changed ${data.get_int("initial-direction")}`);
+        data.apply();
     }
 
     logLevelChanged(data) {
