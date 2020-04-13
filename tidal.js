@@ -69,6 +69,8 @@ var Tidal = class TidalClass {
             }
 
             this.setWindowOpacities();
+        } else if (windowType == 4) {
+            this.setWindowOpacities();
         }
     }
 
@@ -116,9 +118,14 @@ var Tidal = class TidalClass {
             this.activeHighlight.hide();
         }
 
+        let highlighted = false;
         global.get_window_actors().forEach(actor => {
             let meta = actor.get_meta_window();
-            if (meta && meta.get_window_type() == 0 && !meta.minimized) {
+            if (meta &&
+                ((meta.get_window_type() == 0 && !highlighted) ||
+                    meta.get_window_type() == 4) &&
+                !meta.minimized) {
+
                 if (meta.appears_focused || meta.is_attached_dialog()) {
                     this.log.verbose(`tidal.js: window ${meta.get_id()} focused`);
                     actor.opacity = 255;
@@ -137,6 +144,7 @@ var Tidal = class TidalClass {
                         this.activeHighlight.show();
                         this.activeHighlight.refresh();
                         Main.activateWindow(meta);
+                        highlighted = true;
                     }
                 } else {
                     actor.opacity = opacity;
