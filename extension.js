@@ -157,7 +157,8 @@ class Extension {
                         }
                     } else {
                         this.log.verbose(`extension.js: window ${window.get_id()} closed`);
-                        if (window.get_window_type() == 0) {
+                        let windowType = window.get_window_type();
+                        if (windowType === 0 || windowType === 4) {
                             this._tidal.closeWindow(window);
                         }
                     }

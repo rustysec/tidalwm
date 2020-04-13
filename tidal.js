@@ -162,11 +162,13 @@ var Tidal = class TidalClass {
     }
 
     closeWindow(window) {
-        let id = window.get_id();
-        this.log.verbose(`tidal.js: closing window ${id}`);
-        this.pool.removeWindow(window);
-        
-        delete this.windows[id];
+        if (window && window.get_window_type() === 0) {
+            let id = window.get_id();
+            this.log.verbose(`tidal.js: closing window ${id}`);
+            this.pool.removeWindow(window);
+            
+            delete this.windows[id];
+        }
         this.setWindowOpacities();
     }
 
