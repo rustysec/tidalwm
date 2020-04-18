@@ -217,7 +217,40 @@ var Tidal = class TidalClass {
                 window.floating = true;
                 window.window.make_above();
                 self.removeWindow(window.window);
+                self.centerWindow(window.window);
             }
+        }
+    }
+
+    centerWindow(window) {
+        let workspace = window.get_workspace();
+        if (workspace) {
+            let monitor = window.get_monitor();
+            let workArea = workspace.get_work_area_for_monitor(monitor);
+            let gaps = this.settings.get_int("window-gaps");
+            let scale = window.get_display().get_monitor_scale(monitor);
+
+            let windowRect = window.get_frame_rect();
+
+            let maxHeight = workArea.height - ( 2 * gaps * scale);
+            let maxWidth = workArea.width - ( 2 * gaps * scale);
+
+            if (windowRect.height > maxHeight) {
+                windowRect.height = maxHeight;
+            }
+            if (windowRect.width > maxWidth) {
+                windowRect.width = maxWidth;
+            }
+
+            windowRect.x = workArea.x + (workArea.width / 2) - (windowRect.width / 2);
+            windowRect.y = workArea.y + (workArea.height / 2) - (windowRect.height / 2);
+
+            window.move_resize_frame(true,
+                windowRect.x,
+                windowRect.y,
+                windowRect.width,
+                windowRect.height,
+            );
         }
     }
 
@@ -251,18 +284,20 @@ var Tidal = class TidalClass {
             workspace
                 .list_windows()
                 .forEach((window, index) => {
-                    if (this.windows[window.get_id()]) {
-                        let existing = this.windows[window.get_id()];
-                        existing.monitor = window.get_monitor();
-                        existing.workspace = window.get_workspace();
-                        this.windows[window.get_id()] = existing;
-                    } else {
-                        this.windows[window.get_id()] = {
-                            id: window.get_id(),
-                            workspace: window.get_workspace(),
-                            monitor: window.get_monitor(),
-                            window: window
-                        };
+                    if (window && window.get_workspace()) {
+                        if (this.windows[window.get_id()]) {
+                            let existing = this.windows[window.get_id()];
+                            existing.monitor = window.get_monitor();
+                            existing.workspace = window.get_workspace();
+                            this.windows[window.get_id()] = existing;
+                        } else {
+                            this.windows[window.get_id()] = {
+                                id: window.get_id(),
+                                workspace: window.get_workspace(),
+                                monitor: window.get_monitor(),
+                                window: window
+                            };
+                        }
                     }
                 });
         } else {

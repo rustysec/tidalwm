@@ -245,10 +245,10 @@ class Extension {
         this.addKeyBinding("increase-vsplit", (display) => this._tidal.increaseVerticalSplit(display));
         this.addKeyBinding("decrease-vsplit", (display) => this._tidal.decreaseVerticalSplit(display));
 
-        this.addKeyBinding("select-window-above", (display) => this._tidal.selectWindow({ above: true }));
-        this.addKeyBinding("select-window-below", (display) => this._tidal.selectWindow({ below: true }));
-        this.addKeyBinding("select-window-left", (display) => this._tidal.selectWindow({ left: true }));
-        this.addKeyBinding("select-window-right", (display) => this._tidal.selectWindow({ right: true }));
+        this.addKeyBinding("select-window-above", (display) => this._tidal.selectWindow({ above: true, below: false, left: false, right: false }));
+        this.addKeyBinding("select-window-below", (display) => this._tidal.selectWindow({ below: true, above: false, left: false, right: false }));
+        this.addKeyBinding("select-window-left", (display) => this._tidal.selectWindow({ left: true, above: false, below: false, right: false }));
+        this.addKeyBinding("select-window-right", (display) => this._tidal.selectWindow({ right: true, above: false, below: false, left: false }));
     }
 
     disable() {
@@ -279,12 +279,12 @@ class Extension {
         let actor = window.get_compositor_private();
 
         let id = actor.connect('first-frame', () =>  {
+            actor.disconnect(id);
             this.log.verbose(`extension.js: window of type ${window.get_window_type()}, class ${window.get_wm_class()}, and title ${window.get_title()} reached first-frame`);
             let windowType = window.get_window_type();
             if (windowType == 0 || windowType == 4) {
                 this._tidal.addWindow(window);
             }
-            actor.disconnect(id);
         });
     }
 
