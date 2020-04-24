@@ -182,7 +182,7 @@ class Extension {
 
         displaySignals.push(
             global.display.connect("grab-op-end", (obj, display, window, op) => {
-                if (window && window.get_window_type() == 0) { 
+                if (window && window.get_window_type() === 0) { 
                     this.log.verbose(`extension.js: grab op ${op} ended for ${window.get_id()}`);
                     if (window &&
                         (op == 36865        // resize (nw)
@@ -276,16 +276,22 @@ class Extension {
     }
 
     windowCreated(window) {
-        let actor = window.get_compositor_private();
+        this.log.verbose(`extension.js: window ${window.get_id()} of type ${window.get_window_type()}, class ${window.get_wm_class()}, and title ${window.get_title()} created`);
+        let windowType = window.get_window_type();
 
-        let id = actor.connect('first-frame', () =>  {
-            actor.disconnect(id);
-            this.log.verbose(`extension.js: window of type ${window.get_window_type()}, class ${window.get_wm_class()}, and title ${window.get_title()} reached first-frame`);
-            let windowType = window.get_window_type();
-            if (windowType == 0 || windowType == 4) {
+        if (windowType === 0 || windowType === 4) {
+            let actor = window.get_compositor_private();
+
+            let id = actor.connect('first-frame', () =>  {
+                actor.disconnect(id);
+                this.log.verbose(`extension.js: window of type ${window.get_window_type()}, class ${window.get_wm_class()}, and title ${window.get_title()} reached first-frame`);
+                let windowType = window.get_window_type();
+                log(`### TIDAL: adding ${window.get_id()}`);
                 this._tidal.addWindow(window);
-            }
-        });
+            });
+        } else if (windowType === 9) {
+            window.make_above();
+        }
     }
 
     addKeyBinding(key, cb) {

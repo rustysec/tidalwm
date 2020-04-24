@@ -24,32 +24,16 @@ class ActiveHighlight {
         global.window_group.add_child(this._highlightLeft);
     }
 
-    set window(w) {
-        if (w && w !== this._window) {
+    set window(window) {
+        if (window && window !== this._window) {
             if (this._window && this._windowSizeSignal && this._windowPositionSignal) {
                 this._window.disconnect(this._windowSizeSignal);
                 this._window.disconnect(this._windowPositionSignal);
             }
 
-            let actor = w.get_compositor_private();
-            let parent = actor.get_parent();
-
-            if (actor && parent) {
-                /*
-                parent.add_child(this._highlightTop);
-                parent.set_child_below_sibling(this._highlightTop, actor);
-                parent.add_child(this._highlightBottom);
-                parent.set_child_below_sibling(this._highlightBottom, actor);
-                parent.add_child(this._highlightLeft);
-                parent.set_child_below_sibling(this._highlightLeft, actor);
-                parent.add_child(this._highlightRight);
-                parent.set_child_below_sibling(this._highlightRight, actor);
-                */
-            }
-
-            this._window = w;
-            this._windowSignalSizeChanged = this._window.connect("size-changed", (w) => this.windowShown(this, w));
-            this._windowSignalPositionChanged = this._window.connect("position-changed", (w) => this.windowShown(this, w));
+            this._window = window;
+            this._windowSignalSizeChanged = this._window.connect("size-changed", (win) => this.windowShown(this, win));
+            this._windowSignalPositionChanged = this._window.connect("position-changed", (win) => this.windowShown(this, win));
             this.refresh();
         }
     }
@@ -65,9 +49,9 @@ class ActiveHighlight {
         }
     }
 
-    set width(w) {
-        if (w && w !== this._borderWidth) {
-            this._borderWidth = w;
+    set width(width) {
+        if (width && width !== this._borderWidth) {
+            this._borderWidth = width;
             this.refresh();
         }
     }
