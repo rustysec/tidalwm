@@ -203,6 +203,16 @@ var Spiral = class SpiralClass {
                 );
             });
 
+            let tmpPosition = windows[i].window.connect("position-changed", (window) => {
+                window.disconnect(tmpPosition);
+                window.move_resize_frame(true,
+                    self.lastSize.x,
+                    self.lastSize.y,
+                    self.lastSize.width,
+                    self.lastSize.height,
+                );
+            });
+
             windows[i].window.move_resize_frame(true,
                 windows[i].lastSize.x,
                 windows[i].lastSize.y,
