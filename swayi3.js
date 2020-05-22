@@ -3,6 +3,9 @@ const Meta = imports.gi.Meta;
 const HORIZONTAL = 0;
 const VERTICAL = 1;
 
+const INCREASE = 10;
+const DECREASE = -10;
+
 const WINDOW = 0;
 const CONTAINER = 1;
 
@@ -31,6 +34,7 @@ class Container {
         }
         this.children = [];
         this.direction = HORIZONTAL;
+        this.extra_px = 0;
         this.root = isRoot || false;
     }
 
@@ -119,27 +123,31 @@ class Container {
                 workArea.y += gaps;
             }
 
-            let width = this.direction === HORIZONTAL ? (workArea.width - (gaps * (this.children.length - 1))) / this.children.length : workArea.width;
-            let height = this.direction === VERTICAL ? (workArea.height - (gaps * (this.children.length - 1))) / this.children.length : workArea.height;
+            let extra_px = this.children.reduce((sum, child) => { return sum + child.extra_px }, 0)
 
+            let width = this.direction === HORIZONTAL ? (workArea.width - extra_px - (gaps * (this.children.length - 1))) / this.children.length : workArea.width;
+            let height = this.direction === VERTICAL ? (workArea.height - extra_px - (gaps * (this.children.length - 1))) / this.children.length : workArea.height;
+
+            let cumulative_offset = 0
             for (var i = 0; i < this.children.length; i++) {
                 if (this.direction === HORIZONTAL) {
                     let newArea = {
-                        x: workArea.x + (i * (width + gaps)),
+                        x: workArea.x + (i * (width + gaps)) + cumulative_offset,
                         y: workArea.y,
-                        width: width,
+                        width: width + this.children[i].extra_px,
                         height: height
                     };
                     this.children[i].mapInto(newArea, gaps, smartGaps);
                 } else {
                     let newArea = {
                         x: workArea.x,
-                        y: workArea.y + (i * (height + gaps)),
+                        y: workArea.y + (i * (height + gaps)) + cumulative_offset,
                         width: width,
-                        height: height
+                        height: height + this.children[i].extra_px
                     };
                     this.children[i].mapInto(newArea, gaps, smartGaps);
                 }
+                cumulative_offset += this.children[i].extra_px
             }
         }
     }
@@ -193,6 +201,18 @@ class Container {
         }
     }
 
+    adjustSplitForContainerOf(window, direction, delta) {
+        let lineage = this.getLineageFor(window)
+        log(`swayi3.js: Window lineage ${lineage.map(x => `l${x.children.length}, d${x.direction}`)}`)
+        if (lineage.length > 1 && lineage[1].direction == direction) {
+            lineage[0].extra_px += delta;
+            return true;
+        } else if (lineage.length > 2) {
+            lineage[1].extra_px += delta;
+        }
+        return false
+    }
+
     getContainerFor(window) {
         if (this.window) {
             if (this.window === window) {
@@ -208,6 +228,17 @@ class Container {
             }
             return false;
         }
+    }
+
+    getLineageFor(window) {
+        let container = this
+        let lineage = [container]
+        do {
+            container = container.getContainerFor(window)
+            // built the list backwards
+            lineage.unshift(container)
+        } while (!container.window)
+        return lineage
     }
 }
 
@@ -349,24 +380,37 @@ var Swayi3 = class Swayi3Class {
         // todo
     }
 
+    adjustSplit(window, direction, delta) {
+        let root = this.getRootContainer(window.get_workspace().index(), window.get_monitor());
+        if (root) {
+            root.adjustSplitForContainerOf(window, direction, delta);
+            this.log.debug(`swayi3.js: adjust split for ${window}, ${direction}, ${delta})`);
+        }
+        this.execute(window.get_workspace().index(), window.get_monitor());
+    }
+
     increaseHorizontalSplit(window) {
         if (!window || !this.windows[window.get_id()])
             return;
+        this.adjustSplit(window, HORIZONTAL, INCREASE);
     }
 
     decreaseHorizontalSplit(window) {
         if (!window || !this.windows[window.get_id()])
             return;
+        this.adjustSplit(window, HORIZONTAL, DECREASE);
     }
 
     increaseVerticalSplit(window) {
         if (!window || !this.windows[window.get_id()])
             return;
+        this.adjustSplit(window, VERTICAL, INCREASE);
     }
 
     decreaseVerticalSplit(window) {
         if (!window || !this.windows[window.get_id()])
             return;
+        this.adjustSplit(window, VERTICAL, DECREASE);
     }
 
     execute(workspace, monitor) {
