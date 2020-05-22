@@ -296,7 +296,7 @@ var Swayi3 = class Swayi3Class {
             let id = window.get_id();
             if (this.windows[id]) {
                 let { monitor, workspace } = this.windows[id];
-                let root = this.getRootContainer(monitor, workspace);
+                let root = this.getRootContainer(workspace, monitor);
                 if (root) {
                     root.prune();
                     this.execute(workspace, monitor);
