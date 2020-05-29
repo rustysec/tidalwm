@@ -642,6 +642,78 @@ function hotkeysWidget() {
     });
     row += 1;
 
+    label = new Gtk.Label({
+        label: 'Move Window Above:',
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    widget.attach(label, 0, row, 1, 1);
+
+    let moveWindowAboveEntry = new Gtk.Entry({
+        visible: true
+    });
+    moveWindowAboveEntry.set_text(this.settings.get_strv("move-window-above").join(","));
+    widget.attach(moveWindowAboveEntry, 1, row, 1, 1);
+    moveWindowAboveEntry.connect('changed', () => {
+        this.settings.set_strv("move-window-above", moveWindowAboveEntry.get_text().split(","))
+        this.settings.apply();
+    });
+    row += 1;
+
+    label = new Gtk.Label({
+        label: 'Move Window Below:',
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    widget.attach(label, 0, row, 1, 1);
+
+    let moveWindowBelowEntry = new Gtk.Entry({
+        visible: true
+    });
+    moveWindowBelowEntry.set_text(this.settings.get_strv("move-window-below").join(","));
+    widget.attach(moveWindowBelowEntry, 1, row, 1, 1);
+    moveWindowBelowEntry.connect('changed', () => {
+        this.settings.set_strv("move-window-below", moveWindowBelowEntry.get_text().split(","))
+        this.settings.apply();
+    });
+    row += 1;
+
+    label = new Gtk.Label({
+        label: 'Move Window Left:',
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    widget.attach(label, 0, row, 1, 1);
+
+    let moveWindowLeftEntry = new Gtk.Entry({
+        visible: true
+    });
+    moveWindowLeftEntry.set_text(this.settings.get_strv("move-window-left").join(","));
+    widget.attach(moveWindowLeftEntry, 1, row, 1, 1);
+    moveWindowLeftEntry.connect('changed', () => {
+        this.settings.set_strv("move-window-left", moveWindowLeftEntry.get_text().split(","))
+        this.settings.apply();
+    });
+    row += 1;
+
+    label = new Gtk.Label({
+        label: 'Move Window Right:',
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    widget.attach(label, 0, row, 1, 1);
+
+    let moveWindowRightEntry = new Gtk.Entry({
+        visible: true
+    });
+    moveWindowRightEntry.set_text(this.settings.get_strv("move-window-right").join(","));
+    widget.attach(moveWindowRightEntry, 1, row, 1, 1);
+    moveWindowRightEntry.connect('changed', () => {
+        this.settings.set_strv("move-window-right", moveWindowRightEntry.get_text().split(","))
+        this.settings.apply();
+    });
+    row += 1;
+
 
     // Return our widget which will be added to the window
     return widget;

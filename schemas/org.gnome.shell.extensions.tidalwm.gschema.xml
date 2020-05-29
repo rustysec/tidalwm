@@ -111,5 +111,23 @@
             <default><![CDATA[['<Super>Down','<Super>j']]]></default>
             <description>Select window below</description>
         </key>
+
+        <!-- rearrange -->
+        <key name="move-window-right" type="as">
+            <default><![CDATA[['<Shift><Super>l']]]></default>
+            <description>Move selected window to the right</description>
+        </key>
+        <key name="move-window-left" type="as">
+            <default><![CDATA[['<Shift><Super>h']]]></default>
+            <description>Move selected window to the left</description>
+        </key>
+        <key name="move-window-above" type="as">
+            <default><![CDATA[['<Shift><Super>k']]]></default>
+            <description>Move selected window above</description>
+        </key>
+        <key name="move-window-below" type="as">
+            <default><![CDATA[['<Shift><Super>j']]]></default>
+            <description>Move selected window below</description>
+        </key>
     </schema>
 </schemalist>
