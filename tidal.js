@@ -51,8 +51,8 @@ var Tidal = class TidalClass {
                 || alwaysFloat.includes(windowTitle) && windowTitle;
 
             let tidal = this;
-            window.connect("focus", (window) => this.windowFocusChanged(tidal, window));
-            window.connect("shown", (window) => this.windowShown(tidal, window));
+            window.connect("focus", (window) => this.windowFocusChanged(window));
+            window.connect("shown", (window) => this.windowShown(window));
             window.get_compositor_private().connect("effects-completed", (window) => this.checkWindowMinimized(tidal, window));
 
             this.windows[id] = {
@@ -72,6 +72,7 @@ var Tidal = class TidalClass {
         } else if (windowType == 4) {
             this.setWindowOpacities();
         }
+        this.refreshWorkspace();
     }
 
     checkWindowMinimized(tidal, window) {
@@ -87,11 +88,11 @@ var Tidal = class TidalClass {
         }
     }
 
-    windowShown(tidal, meta) {
+    windowShown(meta) {
         let id = meta.get_id();
+        this.log.verbose(`tidal.js: window ${id} shown`);
 
         if (this.windows[id].minimized && !meta.minimized) {
-            tidal.log.verbose(`tidal.js: window ${meta.get_id()} shown`);
             this.windows[id].minimized = meta.minimized;
             let workspace = meta.get_workspace().index();
             let monitor = meta.get_monitor();
@@ -101,11 +102,11 @@ var Tidal = class TidalClass {
     }
 
     // handle window focus events
-    windowFocusChanged(tidal, window) {
+    windowFocusChanged(window) {
         let id = window.get_id();
-        tidal.log.debug(`tidal.js: window focus changed to ${id}`);
+        this.log.debug(`tidal.js: window focus changed to ${id}`);
         if (window.get_window_type() == 0) {
-            tidal.setWindowOpacities();
+            this.setWindowOpacities();
         }
     }
 
@@ -132,9 +133,6 @@ var Tidal = class TidalClass {
 
                     if (highlight && meta.get_workspace().index() === global.workspace_manager.get_active_workspace_index()) {
                         this.log.verbose(`tidal.js: adding highlight to ${meta.get_id()}`);
-                        let scale = meta.get_workspace()
-                                .get_display()
-                                .get_monitor_scale(meta.get_monitor());
 
                         if (highlight && (!this.activeHighlight || !this.activeHighlight.show)) {
                             this.log.debug(`tidal.js: ActiveHighlight was lost`);
@@ -175,11 +173,6 @@ var Tidal = class TidalClass {
     // removes the window from being managed by a pool
     removeWindow(window) {
         if (window.get_window_type() == 0) {
-            let id = window.get_id();
-
-            let monitor = this.windows[id].monitor;
-            let workspace = this.windows[id].workspace;
-
             this.pool.removeWindow(window);
         }
     }
@@ -283,7 +276,7 @@ var Tidal = class TidalClass {
         if (workspace) {
             workspace
                 .list_windows()
-                .forEach((window, index) => {
+                .forEach((window, _index) => {
                     if (window && window.get_workspace()) {
                         if (this.windows[window.get_id()]) {
                             let existing = this.windows[window.get_id()];
@@ -307,7 +300,7 @@ var Tidal = class TidalClass {
         }
     }
 
-    windowAdded(workspace, window) {
+    windowAdded(_workspace, window) {
         let id = window.get_id();
         let item  = this.windows[id];
 
@@ -320,7 +313,7 @@ var Tidal = class TidalClass {
         }
     }
 
-    windowRemoved(workspace, window) {
+    windowRemoved(_workspace, window) {
         let id = window.get_id();
         let item  = this.windows[id];
 

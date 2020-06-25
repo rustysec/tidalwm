@@ -282,12 +282,10 @@ class Extension {
         if (windowType === 0 || windowType === 4) {
             let actor = window.get_compositor_private();
 
-            let id = actor.connect('first-frame', () =>  {
-                actor.disconnect(id);
+            actor.connect('first-frame', () =>  {
                 this.log.verbose(`extension.js: window of type ${window.get_window_type()}, class ${window.get_wm_class()}, and title ${window.get_title()} reached first-frame`);
-                let windowType = window.get_window_type();
-                log(`### TIDAL: adding ${window.get_id()}`);
                 this._tidal.addWindow(window);
+                //actor.disconnect(id);
             });
         } else if (windowType === 9) {
             window.make_above();
