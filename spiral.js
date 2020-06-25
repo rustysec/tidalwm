@@ -160,6 +160,10 @@ var Spiral = class SpiralClass {
                 height: work_area.height
             };
 
+            // try to force the window to be visible
+            let actor = windows[i].window.get_compositor_private();
+            actor.show();
+
             if (windows.length > 1) {
                 // needs bisecting
                 if (direction == HORIZONTAL) {
