@@ -364,6 +364,24 @@ var Tidal = class TidalClass {
     }
 
     selectWindow(direction) {
+        let neighbor = this.getNeighbor(direction);
+        if (!neighbor) {
+            return;
+        }
+        neighbor.focus(0);
+    }
+
+    moveWindow(direction) {
+        this.log.debug(`Attempting to move window ${direction}`);
+        if (this.pool.moveWindow) {
+            let neighbor = this.getNeighbor(direction);
+            if (neighbor) {
+                this.pool.moveWindow(this.getActiveWindow(), neighbor);
+            }
+        }
+    }
+
+    getNeighbor(direction) {
         let active = this.getActiveWindow();
         if (!active)
             return;
@@ -384,20 +402,21 @@ var Tidal = class TidalClass {
             rect.x += offset;
         }
 
-        active.get_workspace().list_windows().forEach(window => {
-            if (window !== active) {
+        let windows = active.get_workspace().list_windows()
+        for (let i = 0; i < windows.length; i++) {
+            if (windows[i] !== active) {
                 let other = this.getWindowRectForMove(
-                    window,
+                    windows[i],
                     direction.above || direction.below,
                     direction.left || direction.right
                 );
 
                 if (rect.overlap(other)) {
-                    this.log.debug(`${active.get_id()} has a neighbor ${window.get_id()}`);
-                    window.focus(0);
+                    this.log.debug(`${active.get_id()} has a neighbor ${windows[i].get_id()}`);
+                    return windows[i];
                 }
             }
-        });
+        }
     }
 
     getWindowRectForMove(window, adjustVertical, adjustHorizontal) {

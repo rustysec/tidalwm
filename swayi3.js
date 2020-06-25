@@ -3,6 +3,9 @@ const Meta = imports.gi.Meta;
 const HORIZONTAL = 0;
 const VERTICAL = 1;
 
+const INCREASE = 10;
+const DECREASE = -10;
+
 const WINDOW = 0;
 const CONTAINER = 1;
 
@@ -31,6 +34,7 @@ class Container {
         }
         this.children = [];
         this.direction = HORIZONTAL;
+        this.extra_px = 0;
         this.root = isRoot || false;
     }
 
@@ -56,7 +60,8 @@ class Container {
                 // check all the children to see if they are windows, match active if possible
                 for (var i = 0; i < this.children.length; i++) {
                     if (this.children[i].window && this.children[i].window.get_id() === active.get_id()) {
-                        this.children.push(new Container(window));
+                        // insert new window "after" active window, not at end
+                        this.children.splice(i + 1, 0, new Container(window));
                         return true;
                     }
                 }
@@ -119,28 +124,49 @@ class Container {
                 workArea.y += gaps;
             }
 
-            let width = this.direction === HORIZONTAL ? (workArea.width - (gaps * (this.children.length - 1))) / this.children.length : workArea.width;
-            let height = this.direction === VERTICAL ? (workArea.height - (gaps * (this.children.length - 1))) / this.children.length : workArea.height;
+            let extra_px = this.children.reduce((sum, child) => { return sum + child.extra_px }, 0)
 
+            let width = this.direction === HORIZONTAL ? (workArea.width - extra_px - (gaps * (this.children.length - 1))) / this.children.length : workArea.width;
+            let height = this.direction === VERTICAL ? (workArea.height - extra_px - (gaps * (this.children.length - 1))) / this.children.length : workArea.height;
+
+            let cumulative_offset = 0
             for (var i = 0; i < this.children.length; i++) {
                 if (this.direction === HORIZONTAL) {
                     let newArea = {
-                        x: workArea.x + (i * (width + gaps)),
+                        x: workArea.x + (i * (width + gaps)) + cumulative_offset,
                         y: workArea.y,
-                        width: width,
+                        width: width + this.children[i].extra_px,
                         height: height
                     };
                     this.children[i].mapInto(newArea, gaps, smartGaps);
                 } else {
                     let newArea = {
                         x: workArea.x,
-                        y: workArea.y + (i * (height + gaps)),
+                        y: workArea.y + (i * (height + gaps)) + cumulative_offset,
                         width: width,
-                        height: height
+                        height: height + this.children[i].extra_px
                     };
                     this.children[i].mapInto(newArea, gaps, smartGaps);
                 }
+                cumulative_offset += this.children[i].extra_px
             }
+        }
+    }
+
+    removeWindow(window) {
+        if (this.window) {
+            if (this.window === window) {
+                this.window = null;
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            for (var i=0; i < this.children.length; i++) {
+                this.children[i].removeWindow(window);
+            }
+
+            this.children = this.children.filter(child => child.window || child.children.length);
         }
     }
 
@@ -193,6 +219,17 @@ class Container {
         }
     }
 
+    adjustSplitForContainerOf(window, direction, delta) {
+        let lineage = this.getLineageFor(window)
+        if (lineage.length > 1 && lineage[1].direction == direction) {
+            lineage[0].extra_px += delta;
+            return true;
+        } else if (lineage.length > 2) {
+            lineage[1].extra_px += delta;
+        }
+        return false
+    }
+
     getContainerFor(window) {
         if (this.window) {
             if (this.window === window) {
@@ -207,6 +244,30 @@ class Container {
                 }
             }
             return false;
+        }
+    }
+
+    getLineageFor(window) {
+        let container = this
+        let lineage = [container]
+        do {
+            container = container.getContainerFor(window)
+            // built the list backwards
+            lineage.unshift(container)
+        } while (!container.window)
+        return lineage
+    }
+
+    swapWindowPositions(window, target) {
+        if (this.window) {
+            return false;
+        }
+        for (let i=0; i < this.children.length; i++) {
+            if (this.children[i].window.get_id() === window.get_id()) {
+                this.children[i].window = target
+            } else if (this.children[i].window.get_id() === target.get_id()) {
+                this.children[i].window = window
+            }
         }
     }
 }
@@ -265,7 +326,7 @@ var Swayi3 = class Swayi3Class {
             let id = window.get_id();
             if (this.windows[id]) {
                 let { monitor, workspace } = this.windows[id];
-                let root = this.getRootContainer(monitor, workspace);
+                let root = this.getRootContainer(workspace, monitor);
                 if (root) {
                     root.prune();
                     this.execute(workspace, monitor);
@@ -286,6 +347,24 @@ var Swayi3 = class Swayi3Class {
                 window.get_workspace().index(),
                 window.get_monitor()
             );
+        }
+    }
+
+    moveWindow(window, target) {
+        this.log.debug(`Moving window ${window.get_id()} to ${target.get_id()}`);
+        if (window && target) {
+            let root = this.getRootContainer(window.get_workspace().index(), window.get_monitor())
+            if (root) {
+                let srcLineage = root.getLineageFor(window);
+                let dstLineage = root.getLineageFor(target);
+                if (srcLineage.length > 1 && dstLineage.length > 1 && srcLineage[1] === dstLineage[1]) {
+                    dstLineage[1].swapWindowPositions(window, target);
+                } else {
+                    root.removeWindow(window);
+                    root.addWindow(window, target)
+                }
+                this.log.debug(`Moved window ${window.get_id()} to ${target.get_id()}`)
+            }
         }
     }
 
@@ -349,24 +428,36 @@ var Swayi3 = class Swayi3Class {
         // todo
     }
 
+    adjustSplit(window, direction, delta) {
+        let root = this.getRootContainer(window.get_workspace().index(), window.get_monitor());
+        if (root) {
+            root.adjustSplitForContainerOf(window, direction, delta);
+        }
+        this.execute(window.get_workspace().index(), window.get_monitor());
+    }
+
     increaseHorizontalSplit(window) {
         if (!window || !this.windows[window.get_id()])
             return;
+        this.adjustSplit(window, HORIZONTAL, INCREASE);
     }
 
     decreaseHorizontalSplit(window) {
         if (!window || !this.windows[window.get_id()])
             return;
+        this.adjustSplit(window, HORIZONTAL, DECREASE);
     }
 
     increaseVerticalSplit(window) {
         if (!window || !this.windows[window.get_id()])
             return;
+        this.adjustSplit(window, VERTICAL, INCREASE);
     }
 
     decreaseVerticalSplit(window) {
         if (!window || !this.windows[window.get_id()])
             return;
+        this.adjustSplit(window, VERTICAL, DECREASE);
     }
 
     execute(workspace, monitor) {

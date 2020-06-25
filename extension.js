@@ -245,6 +245,11 @@ class Extension {
         this.addKeyBinding("select-window-below", (display) => this._tidal.selectWindow({ below: true }));
         this.addKeyBinding("select-window-left", (display) => this._tidal.selectWindow({ left: true }));
         this.addKeyBinding("select-window-right", (display) => this._tidal.selectWindow({ right: true }));
+
+        this.addKeyBinding("move-window-above", (display) => this._tidal.moveWindow({ above: true }));
+        this.addKeyBinding("move-window-below", (display) => this._tidal.moveWindow({ below: true }));
+        this.addKeyBinding("move-window-left", (display) => this._tidal.moveWindow({ left: true }));
+        this.addKeyBinding("move-window-right", (display) => this._tidal.moveWindow({ right: true }));
     }
 
     disable() {
