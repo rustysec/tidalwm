@@ -129,6 +129,8 @@ function gapsWidget() {
     row += 1;
 
     /** Smart Gaps **/
+    let smartGapsFullscreenSwitch;
+
     let label = new Gtk.Label({
         label: 'Smart Gaps:',
         halign: Gtk.Align.START,
@@ -141,8 +143,49 @@ function gapsWidget() {
         visible: true
     });
     widget.attach(smartGapsSwitch, 1, row, 1, 1);
-    smartGapsSwitch.connect('state-set', (t) => {
+    smartGapsSwitch.connect('state-set', (_t) => {
         this.settings.set_boolean("smart-gaps", smartGapsSwitch.get_active());
+        this.settings.apply();
+        smartGapsFullscreenSwitch.set_sensitive(smartGapsSwitch.get_active());
+    });
+    row += 1;
+
+    /** Smart Gaps Full Screen **/
+    /* Experimental still
+    label = new Gtk.Label({
+        label: 'Smart Fullscreen:',
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    widget.attach(label, 0, row, 1, 1);
+    smartGapsFullscreenSwitch = new Gtk.Switch({
+        active: this.settings.get_boolean('smart-gaps-fullscreen'),
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    widget.attach(smartGapsFullscreenSwitch, 1, row, 1, 1);
+    smartGapsFullscreenSwitch.connect('state-set', (_t) => {
+        this.settings.set_boolean("smart-gaps-fullscreen", smartGapsFullscreenSwitch.get_active());
+        this.settings.apply();
+    });
+    row += 1;
+    */
+
+    /** Ignore Scale **/
+    label = new Gtk.Label({
+        label: 'Ignore Scale:',
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    widget.attach(label, 0, row, 1, 1);
+    let ignoreScaleSwitch = new Gtk.Switch({
+        active: this.settings.get_boolean('ignore-scale'),
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    widget.attach(ignoreScaleSwitch, 1, row, 1, 1);
+    ignoreScaleSwitch.connect('state-set', (_t) => {
+        this.settings.set_boolean("ignore-scale", ignoreScaleSwitch.get_active());
         this.settings.apply();
     });
 
@@ -150,6 +193,8 @@ function gapsWidget() {
 }
 
 function windowWidget() {
+    let borderColorEntry;
+
     // Create a parent widget that we'll return from this function
     let widget = new Gtk.Grid({
         margin: 18,
@@ -201,9 +246,10 @@ function windowWidget() {
         visible: true
     });
     widget.attach(highlightActiveSwitch, 1, row, 1, 1);
-    highlightActiveSwitch.connect('state-set', (t) => {
+    highlightActiveSwitch.connect('state-set', (_t) => {
         this.settings.set_boolean("highlight-active", highlightActiveSwitch.get_active());
         this.settings.apply();
+        borderColorEntry.set_sensitive(highlightActiveSwitch.get_active());
     });
     row += 1;
 
@@ -220,7 +266,7 @@ function windowWidget() {
         visible: true
     });
     widget.attach(highlightActiveBorderTopSwitch, 1, row, 1, 1);
-    highlightActiveBorderTopSwitch.connect('state-set', (t) => {
+    highlightActiveBorderTopSwitch.connect('state-set', (_t) => {
         this.settings.set_boolean("highlight-active-border-top", highlightActiveBorderTopSwitch.get_active());
         this.settings.apply();
     });
@@ -239,7 +285,7 @@ function windowWidget() {
         visible: true
     });
     widget.attach(highlightActiveBorderRightSwitch, 1, row, 1, 1);
-    highlightActiveBorderRightSwitch.connect('state-set', (t) => {
+    highlightActiveBorderRightSwitch.connect('state-set', (_t) => {
         this.settings.set_boolean("highlight-active-border-right", highlightActiveBorderRightSwitch.get_active());
         this.settings.apply();
     });
@@ -258,7 +304,7 @@ function windowWidget() {
         visible: true
     });
     widget.attach(highlightActiveBorderBottomSwitch, 1, row, 1, 1);
-    highlightActiveBorderBottomSwitch.connect('state-set', (t) => {
+    highlightActiveBorderBottomSwitch.connect('state-set', (_t) => {
         this.settings.set_boolean("highlight-active-border-bottom", highlightActiveBorderBottomSwitch.get_active());
         this.settings.apply();
     });
@@ -277,7 +323,7 @@ function windowWidget() {
         visible: true
     });
     widget.attach(highlightActiveBorderLeftSwitch, 1, row, 1, 1);
-    highlightActiveBorderLeftSwitch.connect('state-set', (t) => {
+    highlightActiveBorderLeftSwitch.connect('state-set', (_t) => {
         this.settings.set_boolean("highlight-active-border-left", highlightActiveBorderLeftSwitch.get_active());
         this.settings.apply();
     });
@@ -319,7 +365,7 @@ function windowWidget() {
     });
     widget.attach(label, 0, row, 1, 1);
 
-    let borderColorEntry = new Gtk.Entry({
+    borderColorEntry = new Gtk.Entry({
         visible: true
     });
     borderColorEntry.set_sensitive(this.settings.get_boolean("highlight-active"));

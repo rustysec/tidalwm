@@ -37,6 +37,14 @@
             <default>0</default>
             <description>Logging verbosity (0 = info, 1 = debug, 2 = verbose)</description>
         </key>
+        <key name="smart-gaps-fullscreen" type="b">
+            <default>false</default>
+            <description>When using smart gaps, make the window fullscreen</description>
+        </key>
+        <key name="ignore-scale" type="b">
+            <default>false</default>
+            <description>(Experimental) Don't compute scaling for gaps, borders, etc. Use with framebuffer scaling.</description>
+        </key>
 
         <!-- active window highlight -->
         <key name="highlight-active" type="b">

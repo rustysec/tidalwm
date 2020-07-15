@@ -128,12 +128,14 @@ var Spiral = class SpiralClass {
         }
 
         let smartGaps = this.settings.get_boolean("smart-gaps") || !Object.values(this.windows).length;
-
-        let gaps = (smartGaps && this.windows.length == 1) ? 0 :
-            this.settings.get_int("window-gaps") *
+        let smartGapsFullscreen = this.settings.get_boolean("smart-gaps-fullscreen");
+        let scale = this.settings.get_boolean("ignore-scale") ? 1 :
             global.workspace_manager.get_workspace_by_index(workspace)
                 .get_display()
                 .get_monitor_scale(monitor);
+
+        let gaps = (smartGaps && this.windows.length == 1) ? 0 :
+            this.settings.get_int("window-gaps") * scale;
 
         let ws = global.workspace_manager.get_workspace_by_index(workspace);
         let work_area = ws.get_work_area_for_monitor(monitor);
@@ -153,6 +155,7 @@ var Spiral = class SpiralClass {
 
         for (var i = 0; i < windows.length; i++) {
             windows[i].window.unmaximize(Meta.MaximizeFlags.BOTH);
+            windows[i].window.unmake_fullscreen();
             windows[i].lastSize = {
                 x: work_area.x,
                 y: work_area.y,

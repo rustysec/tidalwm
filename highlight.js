@@ -110,10 +110,11 @@ class ActiveHighlight {
             !this.windowIsMaximized()
         ) {
             let rect = this._window.get_frame_rect();
-            let borderWidth = this._borderWidth *
-                this._window
+            let scale = this._settings.get_boolean("ignore-scale") ? 1 :
+                global.workspace_manager.get_workspace_by_index(workspace)
                     .get_display()
-                    .get_monitor_scale(this._window.get_monitor());
+                    .get_monitor_scale(monitor);
+            let borderWidth = this._borderWidth * scale;
 
             if (this._borderTop) {
                 let width = rect.width +
