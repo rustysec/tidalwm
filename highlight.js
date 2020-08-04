@@ -109,6 +109,9 @@ class ActiveHighlight {
             !this._window.minimized &&
             !this.windowIsMaximized()
         ) {
+            let workspace = this._window.get_workspace().index();
+            let monitor = this._window.get_monitor();
+
             let rect = this._window.get_frame_rect();
             let scale = this._settings.get_boolean("ignore-scale") ? 1 :
                 global.workspace_manager.get_workspace_by_index(workspace)
