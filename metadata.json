@@ -1,13 +1,14 @@
 {
-    "extension-id": "tidalwm",
-    "name": "TidalWM",
+    "extension-id": "tidalwm-next",
+    "name": "TidalWM-Next",
     "description": "Sane Gnome tiling window manager",
-    "uuid": "tidalwm@rustysec.github.io",
+    "uuid": "tidalwm-next@rustysec.github.io",
     "shell-version": [
         "3.34",
-        "3.36"
+        "3.36",
+        "3.38"
     ],
-    "version": 3,
+    "version": 4,
     "url": "https://github.com/rustysec/tidalwm",
     "settings-schema": "org.gnome.shell.extensions.tidalwm",
     "gettext-domain": "tidalwm@rustysec.github.io"
