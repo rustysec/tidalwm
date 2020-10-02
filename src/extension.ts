@@ -22,11 +22,11 @@ class Extension {
         this.settings = new Settings.Settings();
         this.tidal = new Tidal.Tidal();
         this.displaySignals = [];
-        this.setupDisplaySignals();
     }
 
     enable() {
         this.log.log('enabled');
+        this.setupDisplaySignals();
     }
 
     disabled() {
@@ -38,6 +38,7 @@ class Extension {
             globalDisplay.connect(
                 'window-created', (_display: any, window: any) => {
                     this.log.log(`window ${window.get_id()} created`);
+                    this.windowCreated(window);
                 }
             )
         );
@@ -61,6 +62,20 @@ class Extension {
                 }
             )
         );
+    }
+    windowCreated(window: any) {
+        let windowType = window.get_window_type();
+        if (windowType === 0 || windowType === 4) {
+            let actor = window.get_compositor_private();
+
+            let id = actor.connect(
+                'first-frame', () => {
+                    this.log.verbose(`window of type ${window.get_window_type()}, class ${window.get_wm_class()}, and title ${window.get_title()} reached first-frame`);
+                    this.tidal.windowCreated(window);
+                    actor.disconnect(id);
+                }
+            )
+        }
     }
 }
 
