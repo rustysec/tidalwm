@@ -30,15 +30,12 @@ export class Tidal {
 
         if (current) {
             this.log.log(`adding ${window.get_id()} to tidal`);
-            let rect = window.get_work_area_current_monitor();
-            this.log.log(`size: ${rect.x}x${rect.y} ${rect.width}x${rect.height}`);
 
-            window.move_resize_frame(true,
-                                     rect.x + 20,
-                                     rect.y + 20,
-                                     rect.width - 40,
-                                     rect.height - 40,
-                                    );
+            for (var set of current.getWorkspacesAndMonitors()) {
+                let { workspace, monitor } = set;
+                current.setOrder(workspace, monitor, this.getNextOrder(workspace, monitor));
+                this.spiral(workspace, monitor);
+            }
         }
     }
 
@@ -46,5 +43,35 @@ export class Tidal {
         this.log.log(`removing ${window.get_id()} from tidal`);
     }
 
-    removeWindow(_window: Meta.Window) {}
+    removeWindow(_window: Meta.Window) {
+        let id = _window.get_id();
+        this.log.log(`removing window ${id}`);
+        delete this.windows[id];
+    }
+
+    getNextOrder(workspace: number, monitor: number) {
+        return (Math.max(...Object.values(this.windows)
+            .map(item => item.getOrder(workspace, monitor) || 0)
+        ) + 1 || 0);
+    }
+
+    spiral(workspace: number, monitor: number) {
+        this.log.log(`spiraling ws ${workspace} monitor ${monitor}`); 
+
+        let containers = Object.values(this.windows)
+            .filter(item => item.window.get_workspace().index() === workspace);
+
+        this.log.log(`things: ${containers}`);
+
+        for (var container of containers) {
+            this.log.log(`doing window ${container.window.get_id()} with order ${container.ordering}`);
+            
+            let order = container.ordering.filter(
+                order =>
+                    order.workspace === workspace &&
+                    order.monitor === monitor
+                )[0];
+            this.log.log(`-> ${order.order}`);
+        }
+    }
 }
