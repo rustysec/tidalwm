@@ -55,13 +55,17 @@ export class Tidal {
         ) + 1 || 0);
     }
 
-    spiral(workspace: number, monitor: number) {
-        this.log.log(`spiraling ws ${workspace} monitor ${monitor}`); 
+    spiral(workspace_number: number, monitor: number) {
+        this.log.log(`spiraling ws ${workspace_number} monitor ${monitor}`); 
 
         let containers = Object.values(this.windows)
-            .filter(item => item.window.get_workspace().index() === workspace);
+            .filter(item => item.window.get_workspace().index() === workspace_number);
 
         this.log.log(`things: ${containers}`);
+
+        // @ts-ignore
+        let workspace = global.workspace_manager.get_workspace_by_index(workspace_number);
+        let work_area = workspace.get_work_area_for_monitor(monitor);
 
         for (var container of containers) {
             this.log.log(`doing window ${container.window.get_id()} with order ${container.ordering}`);
