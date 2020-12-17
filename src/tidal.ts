@@ -4,8 +4,6 @@ import * as Meta from imports.gi;
 const ExtensionUtils = imports.misc.extensionUtils;
 // @ts-ignore
 const Me = ExtensionUtils.getCurrentExtension();
-// @ts-ignore
-const MaximizeFlagsBoth = imports.gi.Meta.MaximizeFlags.Both;
 import * as Log from 'logging';
 import * as Container from 'container';
 import * as Settings from 'settings';
@@ -57,7 +55,12 @@ export class Tidal {
     removeWindow(window: Meta.Window) {
         let id = window.get_id();
         this.log.log(`removing window ${id} from tidal`);
+        let monitor = this.windows[id].monitorNumber;
+        let workSpace = this.windows[id].workspaceNumber;
+        this.log.log(`removal ${id} on ${workSpace}:${monitor}`);
         delete this.windows[id];
+        this.resetOrders(workSpace, monitor)
+        this.spiral(workSpace, monitor);
     }
 
     getNextOrder(workspace: number, monitor: number) {
@@ -67,9 +70,8 @@ export class Tidal {
         ) + 1 || 0);
     }
 
-    spiral(workspace_number: number, monitor: number) {
-        this.log.log(`spiraling ws ${workspace_number} monitor ${monitor}`); 
-
+    // returns a sorted list of containers
+    getContainers(workspace_number: number, monitor: number) {
         let containers = Object.values(this.windows)
             .filter(item => item.isOnWorkspaceAndMonitor(workspace_number, monitor))
             .sort((left, right) => {
@@ -81,6 +83,23 @@ export class Tidal {
                     return left.window.get_id() < right.window.get_id() ? -1 : 1;
                 }
             });
+        return containers;
+    }
+
+    resetOrders(workspace: number, monitor: number) {
+        let containers = this.getContainers(workspace, monitor);
+
+        let order = 0;
+        for (var container of containers) {
+            container.setOrder(order);
+            order++;
+        }
+    }
+
+
+    spiral(workspace_number: number, monitor: number) {
+        this.log.log(`spiraling ws ${workspace_number} monitor ${monitor}`); 
+        let containers = this.getContainers(workspace_number, monitor);
 
         // @ts-ignore
         let workspace = global.workspace_manager.get_workspace_by_index(workspace_number);
@@ -91,13 +110,13 @@ export class Tidal {
         let gaps = (smartGaps && containers.length == 1) ? 0 :
             this.settings.gaps() * scale;
 
-        let work_area = workspace.get_work_area_for_monitor(monitor);
+        let workArea = workspace.get_work_area_for_monitor(monitor);
 
         if (!smartGaps || containers.length > 1) {
-            work_area.x = work_area.x + gaps;
-            work_area.y = work_area.y + gaps;
-            work_area.width = work_area.width - (gaps * 2);
-            work_area.height = work_area.height - (gaps * 2);
+            workArea.x = workArea.x + gaps;
+            workArea.y = workArea.y + gaps;
+            workArea.width = workArea.width - (gaps * 2);
+            workArea.height = workArea.height - (gaps * 2);
         }
 
         for (var index = 0; index < containers.length; index++) {
@@ -105,40 +124,39 @@ export class Tidal {
             this.log.log(`doing window ${container.window.get_id()} with order ${container.order}`);
 
             // set the initial size
-            //container.window.unmaximize(MaximizeFlagsBoth);
             container.window.unmaximize(3);
             container.window.unmake_fullscreen();
             container.position = {
-                x: work_area.x,
-                y: work_area.y,
-                width: work_area.width,
-                height: work_area.height
+                x: workArea.x,
+                y: workArea.y,
+                width: workArea.width,
+                height: workArea.height
             };
 
             if (containers.length > 1) {
                 // needs bisecting
                 if (initialDirection === HORIZONTAL) {
-                    let new_width = (work_area.width / 2) - (gaps / 2);
-                    container.position.x = work_area.x;
-                    container.position.y = work_area.y;
+                    let new_width = (workArea.width / 2) - (gaps / 2);
+                    container.position.x = workArea.x;
+                    container.position.y = workArea.y;
                     container.position.width = (index < (containers.length - 1)) ?
-                        (new_width + container.hSplit) : work_area.width;
-                    container.position.height = work_area.height;
+                        (new_width + container.hSplit) : workArea.width;
+                    container.position.height = workArea.height;
 
                     // adjust for the next window
-                    work_area.x = work_area.x + gaps + new_width + container.hSplit;
-                    work_area.width = new_width - container.hSplit;
+                    workArea.x = workArea.x + gaps + new_width + container.hSplit;
+                    workArea.width = new_width - container.hSplit;
                 } else {
-                    let new_height = (work_area.height / 2) - (gaps / 2);
-                    container.position.x = work_area.x;
-                    container.position.y = work_area.y;
-                    container.position.width = work_area.width;
+                    let new_height = (workArea.height / 2) - (gaps / 2);
+                    container.position.x = workArea.x;
+                    container.position.y = workArea.y;
+                    container.position.width = workArea.width;
                     container.position.height = (index < (containers.length - 1)) ?
-                        (new_height + container.vSplit) : work_area.height;
+                        (new_height + container.vSplit) : workArea.height;
 
                     // adjust for the next window
-                    work_area.y = work_area.y + gaps + new_height + container.vSplit;
-                    work_area.height = new_height - container.vSplit;
+                    workArea.y = workArea.y + gaps + new_height + container.vSplit;
+                    workArea.height = new_height - container.vSplit;
                 }
                 initialDirection = initialDirection ? 0 : 1;
             }

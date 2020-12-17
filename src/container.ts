@@ -26,6 +26,8 @@ export class Container {
     hSplit: number;
     vSplit: number;
     position: Rect;
+    workspaceNumber: number;
+    monitorNumber: number;
 
     constructor(window: Meta.Window) {
         this.active = false;
@@ -34,6 +36,8 @@ export class Container {
         this.hSplit = 0;
         this.vSplit = 0;
         this.position = new Rect(window);
+        this.workspaceNumber = window.get_workspace().index();
+        this.monitorNumber = window.get_monitor();
     }
 
     getOrder() : number {
@@ -45,7 +49,10 @@ export class Container {
     }
 
     isOnWorkspaceAndMonitor(workspace: number, monitor: number) : boolean {
-        return (this.window.is_on_all_workspaces() || this.window.get_workspace().index() == workspace)
+        return (
+            this.window.is_on_all_workspaces() || 
+                (this.window.get_workspace() && this.window.get_workspace().index() == workspace)
+            )
             && (this.window.get_monitor() == monitor);
     }
 
