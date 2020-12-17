@@ -1,4 +1,6 @@
 // @ts-ignore
+import * as Meta from imports.gi;
+// @ts-ignore
 const ExtensionUtils = imports.misc.extensionUtils;
 // @ts-ignore
 const Me = ExtensionUtils.getCurrentExtension();
@@ -45,9 +47,9 @@ class Extension {
         this.displaySignals.push(
             globalDisplay.connect(
                 'window-entered-monitor', (_display: any, monitor: number, window: any) => {
-                    this.log.log(`window ${window.get_id()} entered monitor ${monitor}`);
+                    this.log.log(`window ${window.get_id()} entered monitor ${monitor} (type: ${window.get_window_type()})`);
                     if (window.get_window_type() == 0) {
-                        this.tidal.addWindow(window);
+                        this.tidal.windowChangedMonitor(window);
                     }
                 }
             )
@@ -55,14 +57,38 @@ class Extension {
         this.displaySignals.push(
             globalDisplay.connect(
                 'window-left-monitor', (_display: any, monitor: number, window: any) => {
-                    this.log.log(`window ${window.get_id()} left monitor ${monitor}`);
+                    this.log.log(`window ${window.get_id()} left monitor ${monitor} (type: ${window.get_window_type()})`);
                     if (window.get_window_type() == 0) {
-                        this.tidal.removeWindow(window);
+                        if (!window.get_workspace()) {
+                            this.tidal.closeWindow(window);
+                        }
                     }
                 }
             )
         );
+        this.displaySignals.push(
+            globalDisplay.connect("grab-op-end", (_obj: object, _display: object, window: Meta.Window, op: number) => {
+                if (window && window.get_window_type() === 0) { 
+                    this.log.verbose(`extension.js: grab op ${op} ended for ${window.get_id()}`);
+                    if (window &&
+                        (op == 36865        // resize (nw)
+                        || op == 40961      // resize (ne)
+                        || op == 24577      // resize (se)
+                        || op == 20481      // resize (sw)
+                        || op == 16385      // resize (s)
+                        || op == 32769      // resize (n)
+                        || op == 4097       // resize (w)
+                        || op == 8193)) {   // resize (e)
+                            this.tidal.resetWindow(window);
+                    } else if (window && op == 1 /* move */) {
+                        //this.tidal.dragWindow(window);
+                        this.tidal.resetWindow(window);
+                    }
+                }
+            })
+        );
     }
+
     windowCreated(window: any) {
         let windowType = window.get_window_type();
         if (windowType === 0 || windowType === 4) {

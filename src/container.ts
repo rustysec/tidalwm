@@ -40,6 +40,11 @@ export class Container {
         this.monitorNumber = window.get_monitor();
     }
 
+    update() {
+        this.workspaceNumber = this.window.get_workspace().index();
+        this.monitorNumber = this.window.get_monitor();
+    }
+
     getOrder() : number {
         return this.window.is_on_all_workspaces() ? 0 : this.order;
     }

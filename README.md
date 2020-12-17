@@ -6,17 +6,18 @@ Tidal is intended to be somewhat light on features and only handle the automatic
 placement of windows within the desktop. You may move windows to other desktops or
 monitors using the mouse (drag and drop) or gnome's built in hotkeys.
 
-Currently only "spiral" tiling is supported, but i3/sway and binary splitting are
-options in development.
+Tidal features spiral tiling which is simple, predictable, and very pleasant to use.
 
-#### Spiral
+#### Example
 ![Spiral Example](https://i.imgur.com/W46QTaY.gif)
 
 ## Installing
-Clone this repo:
+Clone this repo (requires typescript to be installed):
 ```sh
 git clone https://github.com/rustysec/tidalwm \
     ~/.local/share/gnome-shell/extensions/tidalwm@rustysec.github.io
+cd ~/.local/share/gnome-shell/extensions/tidalwm@rustysec.github.io
+make
 ```
 
 Logout from current session and login again to start a new session.
@@ -78,8 +79,6 @@ of life settings to make it more pleasant to use.
 |Setting|Description|
 |-------|-----------|
 |`Spiral`| Use spiral tiling|
-|`Binary`| Use binary tiling (_not implemented_)|
-|`i3/sway`| Use i3/sway tiling (_not implemented_)|
 |`Initial Split Direction`| Which way to perform the first split|
 
 #### Hotkeys 

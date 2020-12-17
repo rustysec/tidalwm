@@ -28,8 +28,8 @@ export class Tidal {
         this.log.log(`new window created ${id}`);
         if (!this.windows[id]) {
             this.windows[id] = new Container.Container(window);
-            this.addWindow(window);
         }
+        this.addWindow(window);
     }
 
     addWindow(window: Meta.Window) {
@@ -55,12 +55,47 @@ export class Tidal {
     removeWindow(window: Meta.Window) {
         let id = window.get_id();
         this.log.log(`removing window ${id} from tidal`);
-        let monitor = this.windows[id].monitorNumber;
-        let workSpace = this.windows[id].workspaceNumber;
-        this.log.log(`removal ${id} on ${workSpace}:${monitor}`);
-        delete this.windows[id];
-        this.resetOrders(workSpace, monitor)
-        this.spiral(workSpace, monitor);
+        if (this.windows[id]) {
+            let monitor = this.windows[id].monitorNumber;
+            let workSpace = this.windows[id].workspaceNumber;
+            this.log.log(`removal ${id} on ${workSpace}:${monitor}`);
+            delete this.windows[id];
+            this.resetOrders(workSpace, monitor)
+            this.spiral(workSpace, monitor);
+        }
+    }
+
+    windowChangedMonitor(window: Meta.Window) {
+        let id = window.get_id();
+        let current = this.windows[id];
+
+        if (current) {
+            let oldMonitor = current.monitorNumber;
+            let oldWorkspace = current.workspaceNumber;
+
+            this.log.log(`spiraling old ${oldWorkspace}:${oldMonitor}`);
+            this.spiral(oldWorkspace, oldMonitor);
+            this.resetOrders(oldWorkspace, oldMonitor);
+
+            current.workspaceNumber = window.get_workspace().index();
+            current.monitorNumber = window.get_monitor();
+            current.setOrder(this.getNextOrder(current.workspaceNumber, current.monitorNumber));
+            this.log.log(`spiraling old ${current.workspaceNumber}:${current.monitorNumber}`);
+            this.spiral(current.workspaceNumber, current.monitorNumber);
+            this.resetOrders(current.workspaceNumber, current.monitorNumber);
+        }
+    }
+
+    resetWindow(window: Meta.Window) {
+        let container = this.windows[window.get_id()];
+        if (window.get_workspace() && container) {
+            container.window.move_resize_frame(true,
+                container.position.x,
+                container.position.y,
+                container.position.width,
+                container.position.height,
+            );
+        }
     }
 
     getNextOrder(workspace: number, monitor: number) {
