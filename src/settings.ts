@@ -13,6 +13,7 @@ interface GnomeSettings extends GObject.Object { // @ts-ignore
     get_boolean(key: string): boolean;
     set_boolean(key: string, value: boolean): void;
 
+    get_int(key: string): number;
     get_uint(key: string): number;
     set_uint(key: string, value: number): void;
 
@@ -34,8 +35,20 @@ export class Settings {
         });
     }
 
-    log_level(): number {
+    logLevel(): number {
         return this._settings.get_uint('log-level');
+    }
+
+    smartGaps(): boolean {
+        return this._settings.get_boolean('smart-gaps');
+    }
+
+    gaps(): number {
+        return this._settings.get_int('window-gaps');
+    }
+
+    initialDirection(): number {
+        return this._settings.get_int("initial-direction");
     }
 }
 

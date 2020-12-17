@@ -20,7 +20,7 @@ class Extension {
     constructor() {
         this.log = new Log.Logging(1, 'extension.js');
         this.settings = new Settings.Settings();
-        this.tidal = new Tidal.Tidal();
+        this.tidal = new Tidal.Tidal(this.settings);
         this.displaySignals = [];
     }
 
