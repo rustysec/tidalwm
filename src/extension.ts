@@ -8,6 +8,8 @@ const Me = ExtensionUtils.getCurrentExtension();
 const Gio = imports.gi.Gio;
 // @ts-ignore
 const globalDisplay = global.display;
+// @ts-ignore
+const globalWorkspaceManager = global.workspace_manager;
 
 import * as Settings from 'settings';
 import * as Log from 'logging';
@@ -17,6 +19,7 @@ class Extension {
     log: Log.Logging;
     settings: Settings.Settings;
     displaySignals: Array<number>;
+    workspaceManagerSignals: Array<number>;
     tidal: Tidal.Tidal;
 
     constructor() {
@@ -24,15 +27,25 @@ class Extension {
         this.settings = new Settings.Settings();
         this.tidal = new Tidal.Tidal(this.settings);
         this.displaySignals = [];
+        this.workspaceManagerSignals = [];
     }
 
     enable() {
         this.log.log('enabled');
         this.setupDisplaySignals();
+        this.setupWorkspaceManagerSignals();
     }
 
-    disabled() {
+    disable() {
         this.log.log('disabled');
+    }
+
+    shouldHandleWindow(window: Meta.Window) {
+        let windowType = window.get_type();
+        return (
+            windowType === 0 ||
+            (windowType === 4 && this.settings.tileDialogs())
+        );
     }
 
     setupDisplaySignals() {
@@ -58,10 +71,8 @@ class Extension {
             globalDisplay.connect(
                 'window-left-monitor', (_display: any, monitor: number, window: any) => {
                     this.log.log(`window ${window.get_id()} left monitor ${monitor} (type: ${window.get_window_type()})`);
-                    if (window.get_window_type() == 0) {
-                        if (!window.get_workspace()) {
-                            this.tidal.closeWindow(window);
-                        }
+                    if (!window.get_workspace()) {
+                        this.tidal.closeWindow(window);
                     }
                 }
             )
@@ -69,7 +80,7 @@ class Extension {
         this.displaySignals.push(
             globalDisplay.connect("grab-op-end", (_obj: object, _display: object, window: Meta.Window, op: number) => {
                 if (window && window.get_window_type() === 0) { 
-                    this.log.verbose(`extension.js: grab op ${op} ended for ${window.get_id()}`);
+                    this.log.debug(`extension.js: grab op ${op} ended for ${window.get_id()}`);
                     if (window &&
                         (op == 36865        // resize (nw)
                         || op == 40961      // resize (ne)
@@ -86,6 +97,18 @@ class Extension {
                     }
                 }
             })
+        );
+    }
+
+    setupWorkspaceManagerSignals() {
+        this.workspaceManagerSignals.push(
+            globalWorkspaceManager.connect(
+                'workspace-switched', (_object: any, p0: number, p1: number) => {
+                    this.log.log(`changed from workspace ${p0} to ${p1}`);
+                    this.tidal.spiralAllMonitors(p0, globalDisplay.get_n_monitors());
+                    this.tidal.spiralAllMonitors(p1, globalDisplay.get_n_monitors());
+                }
+            )
         );
     }
 

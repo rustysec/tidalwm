@@ -50,5 +50,9 @@ export class Settings {
     initialDirection(): number {
         return this._settings.get_int("initial-direction");
     }
+
+    tileDialogs(): boolean {
+        return false;
+    }
 }
 

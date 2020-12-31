@@ -73,14 +73,13 @@ export class Tidal {
             let oldMonitor = current.monitorNumber;
             let oldWorkspace = current.workspaceNumber;
 
-            this.log.log(`spiraling old ${oldWorkspace}:${oldMonitor}`);
             this.spiral(oldWorkspace, oldMonitor);
             this.resetOrders(oldWorkspace, oldMonitor);
 
             current.workspaceNumber = window.get_workspace().index();
             current.monitorNumber = window.get_monitor();
             current.setOrder(this.getNextOrder(current.workspaceNumber, current.monitorNumber));
-            this.log.log(`spiraling old ${current.workspaceNumber}:${current.monitorNumber}`);
+
             this.spiral(current.workspaceNumber, current.monitorNumber);
             this.resetOrders(current.workspaceNumber, current.monitorNumber);
         }
@@ -89,12 +88,36 @@ export class Tidal {
     resetWindow(window: Meta.Window) {
         let container = this.windows[window.get_id()];
         if (window.get_workspace() && container) {
-            container.window.move_resize_frame(true,
+            this.log.log(`reset ${window.get_id()} to ${container.position.x},${container.position.y}`)
+
+            let self = container;
+            let tmpResize = container.window.connect("size-changed", (window: Meta.Window) => {
+                window.disconnect(tmpResize);
+                window.move_resize_frame(false,
+                    self.position.x,
+                    self.position.y,
+                    self.position.width,
+                    self.position.height,
+                );
+            });
+            let tmpMoved = container.window.connect("position-changed", (window: Meta.Window) => {
+                window.disconnect(tmpMoved);
+                window.move_resize_frame(false,
+                    self.position.x,
+                    self.position.y,
+                    self.position.width,
+                    self.position.height,
+                );
+            });
+
+            container.window.move_resize_frame(false,
                 container.position.x,
                 container.position.y,
                 container.position.width,
                 container.position.height,
             );
+        } else {
+            this.log.log("cannot get workspace or container")
         }
     }
 
@@ -130,10 +153,16 @@ export class Tidal {
             order++;
         }
     }
+    
+    spiralAllMonitors(workspace_number: number, monitor_count: number) {
+        for (var i=0; i < monitor_count; i++) {
+            this.spiral(workspace_number, i);
+        }
+    }
 
 
     spiral(workspace_number: number, monitor: number) {
-        this.log.log(`spiraling ws ${workspace_number} monitor ${monitor}`); 
+        this.log.debug(`spiraling ws ${workspace_number} monitor ${monitor}`); 
         let containers = this.getContainers(workspace_number, monitor);
 
         // @ts-ignore
@@ -156,7 +185,6 @@ export class Tidal {
 
         for (var index = 0; index < containers.length; index++) {
             let container = containers[index];
-            this.log.log(`doing window ${container.window.get_id()} with order ${container.order}`);
 
             // set the initial size
             container.window.unmaximize(3);
@@ -199,14 +227,23 @@ export class Tidal {
             let self = container;
             let tmpResize = container.window.connect("size-changed", (window: Meta.Window) => {
                 window.disconnect(tmpResize);
-                window.move_resize_frame(true,
+                window.move_resize_frame(false,
                     self.position.x,
                     self.position.y,
                     self.position.width,
                     self.position.height,
                 );
             });
-            container.window.move_resize_frame(true,
+            let tmpMoved = container.window.connect("position-changed", (window: Meta.Window) => {
+                window.disconnect(tmpMoved);
+                window.move_resize_frame(false,
+                    self.position.x,
+                    self.position.y,
+                    self.position.width,
+                    self.position.height,
+                );
+            });
+            container.window.move_resize_frame(false,
                 container.position.x,
                 container.position.y,
                 container.position.width,
