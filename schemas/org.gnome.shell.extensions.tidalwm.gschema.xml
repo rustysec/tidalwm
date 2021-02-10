@@ -45,6 +45,10 @@
             <default>false</default>
             <description>(Experimental) Don't compute scaling for gaps, borders, etc. Use with framebuffer scaling.</description>
         </key>
+        <key name="first-window-width-percent" type="i">
+            <default>50</default>
+            <description>When tiling windows, set the width of the first horizontal window</description>
+        </key>
 
         <!-- active window highlight -->
         <key name="highlight-active" type="b">
