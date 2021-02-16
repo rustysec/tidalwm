@@ -170,27 +170,30 @@ var Spiral = class SpiralClass {
             if (windows.length > 1) {
                 // needs bisecting
                 if (direction == HORIZONTAL) {
-                    let new_width = (work_area.width / 2) - (gaps / 2);
+                    let new_width = (work_area.width / 2) - (gaps / 2) + windows[i].hSplit;
+                    if (i === 0) {
+                        // Use different screen width for 1st window
+                        let first_window_width_percent = this.settings.get_int('first-window-width-percent');
+                        new_width = (work_area.width * first_window_width_percent / 100) - (gaps / 2) + windows[i].hSplit;
+                    }
                     windows[i].lastSize.x = work_area.x;
                     windows[i].lastSize.y = work_area.y;
-                    windows[i].lastSize.width =
-                        (i < windows.length - 1) ? new_width + windows[i].hSplit : work_area.width;
+                    windows[i].lastSize.width = (i < windows.length - 1) ? new_width : work_area.width;
                     windows[i].lastSize.height = work_area.height;
 
                     // adjust for the next window
-                    work_area.x = work_area.x + gaps + new_width + windows[i].hSplit;
-                    work_area.width = new_width - windows[i].hSplit;
+                    work_area.x = work_area.x + gaps + new_width;
+                    work_area.width = work_area.width - new_width - gaps;
                 } else {
-                    let new_height = (work_area.height / 2) - (gaps / 2);
+                    let new_height = (work_area.height / 2) - (gaps / 2) + windows[i].vSplit;
                     windows[i].lastSize.x = work_area.x;
                     windows[i].lastSize.y = work_area.y;
                     windows[i].lastSize.width = work_area.width;
-                    windows[i].lastSize.height = 
-                        (i < windows.length - 1) ? new_height + windows[i].vSplit : work_area.height;
+                    windows[i].lastSize.height = (i < windows.length - 1) ? new_height : work_area.height;
 
                     // adjust for the next window
-                    work_area.y = work_area.y + gaps + new_height + windows[i].vSplit;
-                    work_area.height = new_height - windows[i].vSplit;
+                    work_area.y = work_area.y + gaps + new_height;
+                    work_area.height = work_area.height - new_height - gaps;
                 }
                 direction = direction ? 0 : 1;
             }

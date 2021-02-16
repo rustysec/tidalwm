@@ -394,6 +394,8 @@ function windowWidget() {
 }
 
 function tilingWidget() {
+    let first_window_width;
+
     // Create a parent widget that we'll return from this function
     let widget = new Gtk.Grid({
         margin: 18,
@@ -447,12 +449,48 @@ function tilingWidget() {
         active: initial_direction === 1}
     );
 
-    radio_horizontal.connect('toggled', () => this.settings.set_int("initial-direction", 0));
-    radio_vertical.connect('toggled', () => this.settings.set_int("initial-direction", 1));
+    radio_horizontal.connect('toggled', () => {
+        this.settings.set_int("initial-direction", 0);
+        this.settings.apply();
+        first_window_width.set_sensitive(true);
+    });
+    radio_vertical.connect('toggled', () => {
+        this.settings.set_int("initial-direction", 1);
+        this.settings.apply();
+        first_window_width.set_sensitive(false);
+    });
 
     widget.attach(radio_horizontal, 1, row, 1, 1);
     row += 1;
     widget.attach(radio_vertical, 1, row, 1, 1);
+    row += 1;
+
+    /*** Ratio of the first window ***/
+    label = new Gtk.Label({
+        label: 'First Window Width Percent:',
+        halign: Gtk.Align.START,
+        visible: true
+    });
+    widget.attach(label, 0, row, 1, 1); 
+
+    let width_adjustment = new Gtk.Adjustment({
+        lower: 10,
+        upper: 90,
+        step_increment: 1,
+        value: this.settings.get_int("first-window-width-percent"),
+    });
+
+    first_window_width = new Gtk.SpinButton({
+        value: this.settings.get_int("first-window-width-percent"),
+        numeric: true,
+        snap_to_ticks: true,
+        wrap: true,
+        visible: true,
+        input_purpose: "number",
+        adjustment: width_adjustment,
+    });
+    widget.attach(first_window_width, 1, row, 1, 1);
+    first_window_width.connect('value-changed', () => this.settings.set_int("first-window-width-percent", first_window_width.get_value()));
     row += 1;
 
     return widget;
