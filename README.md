@@ -15,7 +15,8 @@ options in development.
 ## Installing
 Clone this repo:
 ```sh
-git clone https://github.com/rustysec/tidalwm \
+git clone --depth=1 \
+    https://github.com/rustysec/tidalwm \
     ~/.local/share/gnome-shell/extensions/tidalwm@rustysec.github.io
 ```
 
