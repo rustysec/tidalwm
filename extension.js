@@ -220,11 +220,11 @@ class Extension {
             })
         );
 
-        workspaceManagerSignals.push(
-            global.workspace_manager.connect("workspaces-reordered", () => {
-                /// placeholder
-            })
-        );
+        // workspaceManagerSignals.push(
+        //     global.workspace_manager.connect("workspaces-reordered", () => {
+        //         /// placeholder
+        //     })
+        // );
 
         workspaceManagerSignals.push(
             global.workspace_manager.connect("active-workspace-changed", () => {
